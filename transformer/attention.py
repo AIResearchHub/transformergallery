@@ -112,13 +112,82 @@ class Attention(nn.Module):
 
 
 class XLAttention(nn.Module):
+    """
+    Attention module for Transformer layers
+    """
 
-    def __init__(self):
+    def __init__(self, d_model, n_head):
         super(XLAttention, self).__init__()
-        pass
+        self.d_model = d_model
+        self.n_head = n_head
+        self.d_head = d_model // n_head
+        self.attention = ScaledDotProductAttention()
 
-    def forward(self):
-        pass
+        self.w_q = nn.Linear(d_model, d_model)
+        self.w_k = nn.Linear(d_model, d_model)
+        self.w_v = nn.Linear(d_model, d_model)
+        self.w_concat = nn.Linear(d_model, d_model)
+
+        # self.w_q = nn.Linear(d_model, d_model, bias=False)
+        # self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
+        # self.w_concat = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(self, q, kv, mems=None, mask=None):
+        """
+        Parameters:
+        q:     [batch_size, length, d_model]
+        kv:    [batch_size, length, d_model]
+        mems:  [batch_size, mem_length, d_model]
+
+        Returns:
+        out:   [batch_size, length, d_model]
+        """
+        q = q.transpose(0, 1)
+        kv = kv.transpose(0, 1)
+        mems = mems.transpose(0, 1)
+
+        if mems is not None:
+            c = torch.concat([mems, kv], dim=0)
+        else:
+            c = kv
+
+        # q [length, batch_size, d_model]
+        # c [length + mem_length, batch_size, d_model]
+        q, k, v = self.w_q(q), self.w_k(c), self.w_v(c)
+        q, k, v = self.split(q), self.split(k), self.split(v)
+
+        # [hlen, bsz, n_head, d_head]
+        # head_q = self.q_net(h)
+        # head_k, head_v = torch.chunk(self.kv_net(c), 2, -1)
+        #
+        # head_q = head_q.view(h.size(0), h.size(1), self.n_head, self.d_head)
+        # head_k = head_k.view(c.size(0), c.size(1), self.n_head, self.d_head)
+        # head_v = head_v.view(c.size(0), c.size(1), self.n_head, self.d_head)
+
+        out, attention = self.attention(q, k, v, mask=mask)
+
+        out = self.concat(out)
+        out = self.w_concat(out)
+
+        return out
+
+    def split(self, tensor):
+        return tensor.view(tensor.size(0), tensor.size(1), self.n_head, self.d_head)
+
+    def concat(self, tensor):
+        """
+        Inverse function of self.split(tensor : torch.Tensor)
+
+        Parameters:
+        tensor : [batch_size, head, length, d_tensor]
+        Returns:
+        tensor : [batch_size, length, d_model]
+        """
+        batch_size, head, length, d_tensor = tensor.shape
+        d_model = head * d_tensor
+
+        tensor = tensor.transpose(1, 2).contiguous().view(batch_size, length, d_model)
+        return tensor
 
 
 class RecurrentAttention(nn.Module):
