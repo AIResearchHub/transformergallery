@@ -12,11 +12,11 @@ class Memory:
         self.data = data
         self.size = len(data)
 
-        self.state = [[deepcopy(init) for _ in range(seq.size(0))] for seq in self.data]
+        self.state = [[deepcopy(init).cpu() for _ in range(seq.size(0))] for seq in self.data]
 
     def update_state(self, idxs, t, states):
         for idx, state in zip(idxs, states):
-            self.state[idx[0]][idx[1]+t] = state
+            self.state[idx[0]][idx[1]+t] = state.detach().transpose(0, 1).unsqueeze(2).cpu()
 
     def mask_tokens(self, tokens, p):
         target = torch.zeros(*tokens.size(), dtype=torch.int64)
@@ -39,7 +39,7 @@ class Memory:
 
         for i in range(batch_size):
             bufferidx = random.randrange(0, self.size)
-            timeidx = random.randrange(0, self.data[bufferidx].size(0)-length+1)
+            timeidx = random.randrange(0, self.data[bufferidx].size(0)-length)
             idxs.append([bufferidx, timeidx])
 
             tokens = self.data[bufferidx][timeidx:timeidx+length]

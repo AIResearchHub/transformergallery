@@ -34,12 +34,14 @@ class Trainer:
 
         X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
 
-        loss = self.get_grad(X, Y, states, idxs)
+        loss, next_states = self.get_grad(X, Y, states, idxs)
         self.opt.step()
+
+        self.memory.update_state(idxs=idxs, t=1, states=next_states.transpose(0, 2))
 
         return loss
 
-    def get_grad(self, X, Y, state, idxs):
+    def get_grad(self, X, Y, state):
         X = X[0]
         Y = Y[0]
 
@@ -49,7 +51,7 @@ class Trainer:
         loss = self.bert_loss(Y, expected)
         loss.backward()
 
-        return loss.item()
+        return loss.item(), next_state.detach()
 
     def bert_loss(self, target, expected):
         """
