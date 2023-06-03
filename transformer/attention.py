@@ -133,18 +133,18 @@ class XLAttention(nn.Module):
         # self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
         # self.w_concat = nn.Linear(d_model, d_model, bias=False)
 
-    def forward(self, q, kv, mems=None, mask=None):
+    def forward(self, q, kv, mem=None, mask=None):
         """
         Parameters:
         q:     [length, batch_size, d_model]
         kv:    [length, batch_size, d_model]
-        mems:  [mem_length, batch_size, d_model]
+        mem:  [mem_length, batch_size, d_model]
 
         Returns:
         out:   [batch_size, length, d_model]
         """
-        if mems is not None:
-            c = torch.concat([mems, kv], dim=0)
+        if mem is not None:
+            c = torch.concat([mem, kv], dim=0)
         else:
             c = kv
 

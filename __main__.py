@@ -12,7 +12,7 @@ def main():
     data = create_bert_data(max_files=10)
 
     lm = TransformerLM(
-        TransformerXL,
+        cls=TransformerXL,
         vocab_size=30522,
         n_layers=4,
         d_model=512,
@@ -21,7 +21,8 @@ def main():
     )
 
     mem = Memory(
-        data=data
+        data=data,
+        init=lm.init_state()
     )
 
     trainer = Trainer(

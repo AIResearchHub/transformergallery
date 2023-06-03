@@ -3,14 +3,16 @@
 import torch
 import random
 
+from copy import deepcopy
+
 
 class Memory:
 
-    def __init__(self, data):
+    def __init__(self, data, init):
         self.data = data
         self.size = len(data)
 
-        self.state = [[None * seq.size(0)] for seq in data]
+        self.state = [[deepcopy(init) for _ in range(seq.size(0))] for seq in self.data]
 
     def update_state(self, idxs, t, states):
         for idx, state in zip(idxs, states):
@@ -47,16 +49,15 @@ class Memory:
 
             states.append(self.state[bufferidx][timeidx])
 
-        X = torch.stack(X).to("cuda")
-        Y = torch.stack(Y).to("cuda")
-        states = torch.stack(states).to("cuda")
+        X = torch.stack(X).cuda()
+        Y = torch.stack(Y).cuda()
 
         X = X.transpose(0, 1)
         Y = Y.transpose(0, 1)
+        states = states.transpose(0, 1)
 
         assert X.shape == (length, batch_size, X.size(2))
         assert Y.shape == (length, batch_size, Y.size(2))
-        assert states.shape == (batch_size, self.dim)
 
         return X, Y, states, idxs
 

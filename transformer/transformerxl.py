@@ -72,8 +72,9 @@ class TransformerXL(nn.Module):
         x = x.transpose(0, 1)
         next_state = []
         for layer, s in zip(self.layers, state):
-            x, s = layer(x, s)
-            next_state.append(s)
+            print(len(s))
+            x, next_s = layer(x, s)
+            next_state.append(next_s)
 
         x = x.transpose(0, 1)
 

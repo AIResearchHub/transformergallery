@@ -33,6 +33,8 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         """Obtain positional encoding according to input size"""
+        print(x.shape)
+
         batch_size, seq_len, d_model = x.size()
         return self.encoding[:seq_len, :]
 

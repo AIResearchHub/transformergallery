@@ -28,12 +28,22 @@ class Trainer:
         self.rollout = rollout
         self.length = burnin + rollout
 
+
     def step(self):
         """TODO: accumulating gradients"""
 
         X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
 
+        loss = self.get_grad(X, Y, states, idxs)
+        self.opt.step()
+
+        return loss
+
     def get_grad(self, X, Y, state, idxs):
+        X = X[0]
+        Y = Y[0]
+        print(len(state))
+
         self.model.zero_grad()
 
         expected, _ = self.model(X, state)
@@ -50,16 +60,4 @@ class Trainer:
         expected = expected.transpose(1, 2)
 
         return self.criterion(expected, target)
-
-    @staticmethod
-    def soft_update(target, source, tau):
-        for target_param, param in zip(target.parameters(), source.parameters()):
-            target_param.data.copy_(
-                target_param.data * (1.0 - tau) + param.data * tau
-            )
-
-    @staticmethod
-    def hard_update(target, source):
-        for target_param, param in zip(target.parameters(), source.parameters()):
-            target_param.data.copy_(param.data)
 
