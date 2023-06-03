@@ -47,7 +47,7 @@ def main():
         log.flush()
 
         if i % 100 == 0:
-            torch.save(trainer.model, "models/final")
+            torch.save(trainer.model, "saved/final")
 
 
 if __name__ == "__main__":

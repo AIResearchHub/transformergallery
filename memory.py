@@ -52,9 +52,10 @@ class Memory:
         X = torch.stack(X).cuda()
         Y = torch.stack(Y).cuda()
 
+        states = torch.concat(states, dim=2).cuda()
+
         X = X.transpose(0, 1)
         Y = Y.transpose(0, 1)
-        states = states.transpose(0, 1)
 
         assert X.shape == (length, batch_size, X.size(2))
         assert Y.shape == (length, batch_size, Y.size(2))

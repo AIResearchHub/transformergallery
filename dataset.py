@@ -43,9 +43,6 @@ def partition(ids, max_len):
         if book.size(0) > 30:
             books.append(book)
 
-    for book in books:
-        print(book.shape)
-
     return books
 
 

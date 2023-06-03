@@ -19,6 +19,7 @@ class Trainer:
 
         self.model = nn.DataParallel(model).cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
+        self.criterion = nn.NLLLoss(ignore_index=0)
 
         self.memory = memory
         self.batch_size = batch_size
@@ -27,7 +28,6 @@ class Trainer:
         self.burnin = burnin
         self.rollout = rollout
         self.length = burnin + rollout
-
 
     def step(self):
         """TODO: accumulating gradients"""
@@ -42,11 +42,10 @@ class Trainer:
     def get_grad(self, X, Y, state, idxs):
         X = X[0]
         Y = Y[0]
-        print(len(state))
 
         self.model.zero_grad()
 
-        expected, _ = self.model(X, state)
+        expected, next_state = self.model(X, state)
         loss = self.bert_loss(Y, expected)
         loss.backward()
 
