@@ -1,6 +1,7 @@
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 import math
 
@@ -135,17 +136,13 @@ class XLAttention(nn.Module):
     def forward(self, q, kv, mems=None, mask=None):
         """
         Parameters:
-        q:     [batch_size, length, d_model]
-        kv:    [batch_size, length, d_model]
-        mems:  [batch_size, mem_length, d_model]
+        q:     [length, batch_size, d_model]
+        kv:    [length, batch_size, d_model]
+        mems:  [mem_length, batch_size, d_model]
 
         Returns:
         out:   [batch_size, length, d_model]
         """
-        q = q.transpose(0, 1)
-        kv = kv.transpose(0, 1)
-        mems = mems.transpose(0, 1)
-
         if mems is not None:
             c = torch.concat([mems, kv], dim=0)
         else:
@@ -156,38 +153,26 @@ class XLAttention(nn.Module):
         q, k, v = self.w_q(q), self.w_k(c), self.w_v(c)
         q, k, v = self.split(q), self.split(k), self.split(v)
 
-        # [hlen, bsz, n_head, d_head]
-        # head_q = self.q_net(h)
-        # head_k, head_v = torch.chunk(self.kv_net(c), 2, -1)
-        #
-        # head_q = head_q.view(h.size(0), h.size(1), self.n_head, self.d_head)
-        # head_k = head_k.view(c.size(0), c.size(1), self.n_head, self.d_head)
-        # head_v = head_v.view(c.size(0), c.size(1), self.n_head, self.d_head)
+        # q  [length, batch_size, n_head, d_head]
+        # kv [length+mem_length, batch_size, n_head, d_head]
+        attn_score = torch.einsum('ibnd,jbnd->ijbn', (q, k)) / math.sqrt(self.d_head)
 
-        out, attention = self.attention(q, k, v, mask=mask)
+        # attn_score [length, length+mem_length, batch_size, n_head]
+        attn_prob = F.softmax(attn_score, dim=1)
 
-        out = self.concat(out)
+        # attn_prob [length, length + mem_length, batch_size, n_head]
+        # v         [length, batch_size, n_head, d_head]
+        attn_vec = torch.einsum('ijbn,jbnd->ibnd', (attn_prob, v))
+
+        # attn_vec [length, batch_size, n_head, d_head]
+        out = attn_vec.contiguous().view(attn_vec.size(0), attn_vec.size(1), self.n_head * self.d_head)
         out = self.w_concat(out)
 
+        # out [length, batch_size, d_model]
         return out
 
     def split(self, tensor):
         return tensor.view(tensor.size(0), tensor.size(1), self.n_head, self.d_head)
-
-    def concat(self, tensor):
-        """
-        Inverse function of self.split(tensor : torch.Tensor)
-
-        Parameters:
-        tensor : [batch_size, head, length, d_tensor]
-        Returns:
-        tensor : [batch_size, length, d_model]
-        """
-        batch_size, head, length, d_tensor = tensor.shape
-        d_model = head * d_tensor
-
-        tensor = tensor.transpose(1, 2).contiguous().view(batch_size, length, d_model)
-        return tensor
 
 
 class RecurrentAttention(nn.Module):

@@ -42,6 +42,9 @@ class Transformer(nn.Module):
                                                     p=p)
                                     for _ in range(n_layers)])
 
+    def init_state(self):
+        return None
+
     def state_forward(self, state):
         """Returns next recurrent state, since standard transformer just return original state"""
         return state

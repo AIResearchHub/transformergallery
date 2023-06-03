@@ -1,5 +1,6 @@
 
 
+import torch
 import torch.nn as nn
 
 from .embedding import TransformerEmbedding
@@ -31,6 +32,9 @@ class TransformerXL(nn.Module):
                  ):
 
         super(TransformerXL, self).__init__()
+        self.max_len = max_len
+        self.n_layers = n_layers
+        self.d_model = d_model
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
@@ -42,13 +46,17 @@ class TransformerXL(nn.Module):
                                                       p=p)
                                     for _ in range(n_layers)])
 
+    def init_state(self, batch_size=1):
+        return [torch.zeros(self.max_len, batch_size, self.d_model) for _ in range(self.n_layers)]
+
     def state_forward(self, state):
         """Returns next recurrent state, since standard transformer just return original state"""
         return state
 
     def forward(self, ids, state):
         """
-        Computes transformer output
+        Computes transformer xl output
+        Layer takes in (length, batch_size, d_model) so transpose before and after layers
 
         Parameters:
         ids (Tensor[batch_size, length]): tokens
@@ -61,8 +69,13 @@ class TransformerXL(nn.Module):
         """
         x = self.embedding(ids)
 
-        for layer in self.layers:
-            x = layer(x)
+        x = x.transpose(0, 1)
+        next_state = []
+        for layer, s in zip(self.layers, state):
+            x, s = layer(x, s)
+            next_state.append(s)
+
+        x = x.transpose(0, 1)
 
         return x, state
 
