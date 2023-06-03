@@ -7,11 +7,14 @@ dir.sort()
 latestfile = "logs/" + dir[-1]
 
 data = pd.read_csv(latestfile,
-                   names=["Loss"]
+                   names=["Time",
+                          "Loss"]
                    )
 
-plt.subplot(1, 1, 1)
-plt.plot(data["Loss"])
+plt.subplot(2, 1, 1)
+plt.plot(data["Time"])
 
+plt.subplot(2, 1, 2)
+plt.plot(data["Loss"])
 plt.show()
 

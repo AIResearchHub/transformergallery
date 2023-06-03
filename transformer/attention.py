@@ -175,6 +175,15 @@ class XLAttention(nn.Module):
         return tensor.view(tensor.size(0), tensor.size(1), self.n_head, self.d_head)
 
 
+class LongformerAttention(nn.Module):
+
+    def __init__(self):
+        pass
+
+    def forward(self):
+        pass
+
+
 class RecurrentAttention(nn.Module):
     """
     Recurrent Attention module for Block Recurrent Transformer Recurrent Layer

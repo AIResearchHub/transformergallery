@@ -34,10 +34,10 @@ class Trainer:
 
         X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
 
-        loss, next_states = self.get_grad(X, Y, states, idxs)
+        loss, next_states = self.get_grad(X, Y, states)
         self.opt.step()
 
-        self.memory.update_state(idxs=idxs, t=1, states=next_states.transpose(0, 2))
+        self.memory.update_state(idxs=idxs, t=1, states=next_states)
 
         return loss
 

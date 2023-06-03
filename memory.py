@@ -15,6 +15,9 @@ class Memory:
         self.state = [[deepcopy(init).cpu() for _ in range(seq.size(0))] for seq in self.data]
 
     def update_state(self, idxs, t, states):
+        """states (n_layers, seq_len, batch_size, d_model)"""
+        states = states.transpose(0, 2)
+
         for idx, state in zip(idxs, states):
             self.state[idx[0]][idx[1]+t] = state.detach().transpose(0, 1).unsqueeze(2).cpu()
 
