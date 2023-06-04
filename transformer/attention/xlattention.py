@@ -25,41 +25,45 @@ class XLAttention(nn.Module):
     def forward(self, q, kv, mems=None, mask=None):
         """
         Parameters:
-        q:     [length, batch_size, d_model]
-        kv:    [length, batch_size, d_model]
-        mems:  [mem_length, batch_size, d_model]
+        q:     [batch_size, length, d_model]
+        kv:    [batch_size, length, d_model]
+        mems:  [batch_size, mem_length, d_model]
 
         Returns:
         out:   [batch_size, length, d_model]
         """
+        batch_size, length, d_model = q.shape
+
         if mems is not None:
-            c = torch.concat([mems, kv], dim=0)
+            c = torch.concat([mems, kv], dim=1)
         else:
             c = kv
 
-        # q [length, batch_size, d_model]
-        # c [length + mem_length, batch_size, d_model]
+        # q [batch_size, length, d_model]
+        # c [batch_size, length+mem_length, d_model]
         q, k, v = self.w_q(q), self.w_k(c), self.w_v(c)
         q, k, v = self.split(q), self.split(k), self.split(v)
 
-        # q  [length, batch_size, n_head, d_head]
-        # kv [length+mem_length, batch_size, n_head, d_head]
-        attn_score = torch.einsum('ibnd,jbnd->ijbn', (q, k)) / math.sqrt(self.d_head)
+        # q  [batch_size, n_head, length, d_head]
+        # k  [batch_size, n_head, length+mem_length, d_head]
+        attn_score = torch.einsum('bhid,bhjd->bhij', (q, k)) / math.sqrt(self.d_head)
 
-        # attn_score [length, length+mem_length, batch_size, n_head]
-        attn_prob = F.softmax(attn_score, dim=1)
+        if mask is not None:
+            attn_score = attn_score.masked_fill(mask == 0, -10000)
 
-        # attn_prob [length, length + mem_length, batch_size, n_head]
-        # v         [length, batch_size, n_head, d_head]
-        attn_vec = torch.einsum('ijbn,jbnd->ibnd', (attn_prob, v))
+        attn_prob = F.softmax(attn_score, dim=-1)
 
-        # attn_vec [length, batch_size, n_head, d_head]
-        out = attn_vec.contiguous().view(attn_vec.size(0), attn_vec.size(1), self.n_head * self.d_head)
+        # attn_prob [batch_size, n_head, length, length+mem_length]
+        # v         [batch_size, n_head, length+mem_length, d_head]
+        out = (attn_prob @ v).transpose(1, 2).reshape(batch_size, length, d_model)
         out = self.w_concat(out)
 
-        # out [length, batch_size, d_model]
+        # out [batch_size, length, d_model]
         return out
 
     def split(self, tensor):
-        return tensor.view(tensor.size(0), tensor.size(1), self.n_head, self.d_head)
+        tensor = tensor.view(tensor.size(0), tensor.size(1), self.n_head, self.d_head)
+        tensor = tensor.transpose(1, 2)
+
+        return tensor
 

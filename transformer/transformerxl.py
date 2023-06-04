@@ -70,13 +70,11 @@ class TransformerXL(nn.Module):
         """
         x = self.embedding(ids)
 
-        x = x.transpose(0, 1)
         next_state = []
         for layer, s in zip(self.layers, state):
             next_state.append(x.detach())
             x = layer(x, s)
 
-        x = x.transpose(0, 1)
         next_state = torch.stack(next_state)
 
         return x, next_state
