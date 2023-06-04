@@ -13,7 +13,7 @@ def main():
     data = create_bert_data(max_files=1000)
 
     lm = TransformerLM(
-        cls=TransformerXL,
+        cls=Transformer,
         vocab_size=30522,
         n_layers=4,
         d_model=512,

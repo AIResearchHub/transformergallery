@@ -58,6 +58,9 @@ class Trainer:
         :param target:   [batch_size, max_len]
         :param expected: [batch_size, max_len, vocab_size]
         """
+        assert target.shape == (self.batch_size, target.size(1))
+        assert expected.shape == (self.batch_size, target.size(1), expected.size(2))
+
         expected = expected.transpose(1, 2)
 
         return self.criterion(expected, target)

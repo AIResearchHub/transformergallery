@@ -21,7 +21,7 @@ class XLAttentionLayer(nn.Module):
     def forward(self, x, mem, src_mask=None):
         """Compute the output of the transformer layer"""
         _x = x
-        x = self.attention(q=x, k=x, v=x, mem=mem, mask=src_mask)
+        x = self.attention(q=x, kv=x, mem=mem, mask=src_mask)
 
         x = self.norm1(x + _x)
         x = self.dropout1(x)

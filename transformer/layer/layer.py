@@ -31,7 +31,7 @@ class AttentionLayer(nn.Module):
     def forward(self, x, src_mask=None):
         """Compute the output of the transformer layer"""
         _x = x
-        x = self.attention(q=x, k=x, v=x, mask=src_mask)
+        x = self.attention(q=x, kv=x, mask=src_mask)
 
         x = self.norm1(x + _x)
         x = self.dropout1(x)
