@@ -1,6 +1,7 @@
 
 
 import torch
+import time
 
 from transformer import TransformerLM, Transformer, TransformerXL
 from memory import Memory
@@ -9,10 +10,10 @@ from dataset import create_bert_data
 
 
 def main():
-    data = create_bert_data(max_files=10)
+    data = create_bert_data(max_files=1000)
 
     lm = TransformerLM(
-        TransformerXL,
+        cls=TransformerXL,
         vocab_size=30522,
         n_layers=4,
         d_model=512,
@@ -21,7 +22,8 @@ def main():
     )
 
     mem = Memory(
-        data=data
+        data=data,
+        init=lm.init_state()
     )
 
     trainer = Trainer(
@@ -38,15 +40,16 @@ def main():
     log = open(filename, "w")
 
     timesteps = 100000
+    start = time.time()
     for i in range(timesteps):
         loss = trainer.step()
 
-        print(f"{loss}")
-        log.write(f"{loss}\n")
+        print(f"{time.time() - start}, {loss}")
+        log.write(f"{time.time() - start}, {loss}\n")
         log.flush()
 
         if i % 100 == 0:
-            torch.save(trainer.model, "models/final")
+            torch.save(trainer.model, "saved/final")
 
 
 if __name__ == "__main__":
