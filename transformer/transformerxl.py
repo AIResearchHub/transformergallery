@@ -3,8 +3,7 @@
 import torch
 import torch.nn as nn
 
-from .embedding import TransformerEmbedding
-from .layer import XLAttentionLayer
+from .layer import TransformerEmbedding, XLAttentionLayer
 
 
 class TransformerXL(nn.Module):
@@ -28,13 +27,15 @@ class TransformerXL(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1
+                 p=0.1,
+                 device="cuda"
                  ):
 
         super(TransformerXL, self).__init__()
         self.max_len = max_len
         self.n_layers = n_layers
         self.d_model = d_model
+        self.device = device
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
@@ -47,7 +48,7 @@ class TransformerXL(nn.Module):
                                     for _ in range(n_layers)])
 
     def init_state(self, batch_size=1):
-        return [torch.zeros(self.max_len, batch_size, self.d_model) for _ in range(self.n_layers)]
+        return torch.zeros(self.n_layers, self.max_len, batch_size, self.d_model, device=self.device)
 
     def state_forward(self, state):
         """Returns next recurrent state, since standard transformer just return original state"""
@@ -72,10 +73,10 @@ class TransformerXL(nn.Module):
         x = x.transpose(0, 1)
         next_state = []
         for layer, s in zip(self.layers, state):
-            x, s = layer(x, s)
-            next_state.append(s)
+            next_state.append(x.detach())
+            x = layer(x, s)
 
         x = x.transpose(0, 1)
+        next_state = torch.stack(next_state)
 
-        return x, state
-
+        return x, next_state

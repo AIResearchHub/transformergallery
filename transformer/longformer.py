@@ -3,10 +3,10 @@
 import torch
 import torch.nn as nn
 
-from .layer import TransformerEmbedding, AttentionLayer
+from .layer import TransformerEmbedding, LongformerLayer
 
 
-class Transformer(nn.Module):
+class Longformer(nn.Module):
     """
     A standard Transformer module that outputs the unprocessed
     output of the last transformer layer
@@ -31,17 +31,17 @@ class Transformer(nn.Module):
                  device="cuda"
                  ):
 
-        super(Transformer, self).__init__()
+        super(Longformer, self).__init__()
         self.device = device
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
                                               max_len=max_len)
 
-        self.layers = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                    ffn_hidden=4 * d_model,
-                                                    n_head=n_head,
-                                                    p=p)
+        self.layers = nn.ModuleList([LongformerLayer(d_model=d_model,
+                                                     ffn_hidden=4 * d_model,
+                                                     n_head=n_head,
+                                                     p=p)
                                     for _ in range(n_layers)])
 
     def init_state(self):
