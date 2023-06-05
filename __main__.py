@@ -10,7 +10,7 @@ from dataset import create_bert_data
 
 
 def main():
-    data = create_bert_data(max_files=1000)
+    data = create_bert_data(max_files=20)
 
     lm = TransformerLM(
         cls=Transformer,
@@ -20,6 +20,8 @@ def main():
         n_head=8,
         p=0.1
     )
+
+    print("data loaded")
 
     mem = Memory(
         data=data,
@@ -33,13 +35,13 @@ def main():
         batch_size=32,
         n_accumulate=2,
         burnin=0,
-        rollout=1
+        rollout=5
     )
 
     filename = f"logs/lm"
     log = open(filename, "w")
 
-    timesteps = 100000
+    timesteps = 500
     start = time.time()
     for i in range(timesteps):
         loss = trainer.step()

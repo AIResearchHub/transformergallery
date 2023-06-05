@@ -1,6 +1,5 @@
 
 
-import torch
 import torch.nn as nn
 from torch.optim import Adam
 
@@ -34,10 +33,8 @@ class Trainer:
 
         X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
 
-        loss, next_states = self.get_grad(X, Y, states)
+        loss = self.get_grad(X, Y, states)
         self.opt.step()
-
-        self.memory.update_state(idxs=idxs, t=1, states=next_states)
 
         return loss
 
@@ -46,12 +43,17 @@ class Trainer:
         Y = Y[0]
 
         self.model.zero_grad()
+        total_loss = 0
+        for i in range(self.rollout):
+            expected, state = self.model(X, state)
+            loss = self.bert_loss(Y, expected)
+            loss.backward()
+            total_loss += loss.item()
 
-        expected, next_state = self.model(X, state)
-        loss = self.bert_loss(Y, expected)
-        loss.backward()
+        for x in self.model.parameters():
+            x.grad.data.mul_(1/self.rollout)
 
-        return loss.item(), next_state.detach()
+        return total_loss
 
     def bert_loss(self, target, expected):
         """

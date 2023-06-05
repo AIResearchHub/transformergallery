@@ -12,14 +12,15 @@ class Memory:
         self.data = data
         self.size = len(data)
 
-        self.state = [[deepcopy(init).cpu() for _ in range(seq.size(0))] for seq in self.data]
+        # self.state = [[deepcopy(init).cpu() for _ in range(seq.size(0))] for seq in self.data]
 
     def update_state(self, idxs, t, states):
         """states (n_layer, batch_size, length, d_model)"""
         states = states.transpose(0, 1)
 
         for idx, state in zip(idxs, states):
-            self.state[idx[0]][idx[1]+t] = state.detach().unsqueeze(1).cpu()
+            pass
+            # self.state[idx[0]][idx[1]+t] = state.detach().unsqueeze(1).cpu()
 
     def mask_tokens(self, tokens, p):
         target = torch.zeros(*tokens.size(), dtype=torch.int64)
@@ -46,11 +47,12 @@ class Memory:
             idxs.append([bufferidx, timeidx])
 
             tokens = self.data[bufferidx][timeidx:timeidx+length]
-            x, y = self.mask_tokens(tokens, p=0.25)
+            x, y = self.mask_tokens(tokens, p=0.20)
             X.append(x)
             Y.append(y)
 
-            states.append(self.state[bufferidx][timeidx])
+            # states.append(self.state[bufferidx][timeidx])
+            states.append(torch.zeros(4, 1, 512, 512))
 
         X = torch.stack(X).cuda()
         Y = torch.stack(Y).cuda()
