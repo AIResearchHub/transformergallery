@@ -51,7 +51,8 @@ class Trainer:
             total_loss += loss.item()
 
         for x in self.model.parameters():
-            x.grad.data.mul_(1/self.rollout)
+            if x.grad is not None:
+                x.grad.data.mul_(1/self.rollout)
 
         return total_loss
 
