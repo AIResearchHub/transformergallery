@@ -8,7 +8,7 @@ from .layer import TransformerEmbedding, LongformerLayer
 
 class Longformer(nn.Module):
     """
-    A standard Transformer module that outputs the unprocessed
+    A standard Longformer module that outputs the unprocessed
     output of the last transformer layer
 
     Parameters:
@@ -27,27 +27,23 @@ class Longformer(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1,
-                 device="cuda"
+                 p=0.1
                  ):
-
         super(Longformer, self).__init__()
-        self.device = device
+        self.max_len = max_len
+        self.n_layers = n_layers
+        self.d_model = d_model
 
-        self.embedding = TransformerEmbedding(vocab_size=vocab_size,
-                                              d_model=d_model,
-                                              max_len=max_len)
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.layers = nn.ModuleList(
+            [LongformerLayer(d_model=d_model, ffn_hidden=4 * d_model, n_head=n_head, p=p)
+             for _ in range(n_layers)])
 
-        self.layers = nn.ModuleList([LongformerLayer(d_model=d_model,
-                                                     ffn_hidden=4 * d_model,
-                                                     n_head=n_head,
-                                                     p=p)
-                                    for _ in range(n_layers)])
 
-    def init_state(self):
-        return torch.zeros(1, 1, 1, 1, device=self.device)
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=device)
 
-    def state_forward(self, state):
+    def state_forward(self, ids, state):
         """Returns next recurrent state, since standard transformer just return original state"""
         return state
 
@@ -68,5 +64,6 @@ class Longformer(nn.Module):
 
         for layer in self.layers:
             x = layer(x)
+            # print(x.shape)
 
         return x, state
