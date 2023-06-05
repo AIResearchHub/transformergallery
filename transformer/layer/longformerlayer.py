@@ -55,7 +55,6 @@ class LongformerLayer(nn.Module):
         is_index_masked = torch.zeros((x.shape[0], x.shape[1]), dtype=torch.bool, device=x.device)
 
         _x = x
-        print(attention_mask)
         x = self.attention(x, attention_mask=attention_mask, is_index_masked=is_index_masked)[0]
 
         x = self.norm1(x + _x)

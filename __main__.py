@@ -3,7 +3,7 @@
 import torch
 import time
 
-from transformer import TransformerLM, Transformer, TransformerXL
+from transformer import TransformerLM, Transformer, TransformerXL, Longformer
 from memory import Memory
 from trainer import Trainer
 from dataset import create_bert_data
@@ -13,15 +13,13 @@ def main():
     data = create_bert_data(max_files=20)
 
     lm = TransformerLM(
-        cls=Transformer,
+        cls=Longformer,
         vocab_size=30522,
         n_layers=4,
         d_model=512,
         n_head=8,
         p=0.1
     )
-
-    print("data loaded")
 
     mem = Memory(
         data=data,
