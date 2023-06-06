@@ -48,7 +48,7 @@ class TransformerXL(nn.Module):
                                     for _ in range(n_layers)])
 
     def init_state(self, batch_size=1):
-        return torch.zeros(self.n_layers, self.max_len, batch_size, self.d_model, device=self.device)
+        return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=self.device)
 
     def state_forward(self, state):
         """Returns next recurrent state, since standard transformer just return original state"""

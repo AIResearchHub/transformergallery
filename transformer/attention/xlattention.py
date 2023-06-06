@@ -22,7 +22,7 @@ class XLAttention(nn.Module):
         self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
         self.w_concat = nn.Linear(d_model, d_model, bias=False)
 
-    def forward(self, q, kv, mems=None, mask=None):
+    def forward(self, q, kv, mem=None, mask=None):
         """
         Parameters:
         q:     [batch_size, length, d_model]
@@ -34,19 +34,19 @@ class XLAttention(nn.Module):
         """
         batch_size, length, d_model = q.shape
 
-        if mems is not None:
-            c = torch.concat([mems, kv], dim=1)
+        if mem is not None:
+            c = torch.concat([mem, kv], dim=1)
         else:
             c = kv
 
         # q [batch_size, length, d_model]
         # c [batch_size, length+mem_length, d_model]
-        q, k, v = self.w_q(q), self.w_k(c), self.w_v(c)
-        q, k, v = self.split(q), self.split(k), self.split(v)
+        q, k, v = self.w_q(q), *self.w_kv(c).chunk(2, dim=-1)
+        q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
         # q  [batch_size, n_head, length, d_head]
         # k  [batch_size, n_head, length+mem_length, d_head]
-        attn_score = torch.einsum('bhid,bhjd->bhij', (q, k)) / math.sqrt(self.d_head)
+        attn_score = torch.einsum('bhid,bojd->bhij', (q, k)) / math.sqrt(self.d_head)
 
         if mask is not None:
             attn_score = attn_score.masked_fill(mask == 0, -10000)
@@ -59,6 +59,8 @@ class XLAttention(nn.Module):
         out = self.w_concat(out)
 
         # out [batch_size, length, d_model]
+        assert out.shape == (batch_size, length, d_model)
+
         return out
 
     def split(self, tensor):
