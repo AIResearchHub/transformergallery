@@ -10,11 +10,12 @@ from dataset import create_bert_data
 
 
 def main():
-    data = create_bert_data(max_files=20)
+    data = create_bert_data(max_files=20, max_len=8192)
 
     lm = TransformerLM(
         cls=Longformer,
         vocab_size=30522,
+        max_len=8192,
         n_layers=4,
         d_model=512,
         n_head=8,
@@ -30,7 +31,7 @@ def main():
         model=lm,
         memory=mem,
         lr=1e-4,
-        batch_size=32,
+        batch_size=1,
         n_accumulate=2,
         burnin=0,
         rollout=5
@@ -44,7 +45,7 @@ def main():
     for i in range(timesteps):
         loss = trainer.step()
 
-        print(f"{time.time() - start}, {loss}")
+        print(f"Time: {time.time() - start} \t Loss: {loss} \t Update/Sec: {(time.time() - start) / (i + 1)}")
         log.write(f"{time.time() - start}, {loss}\n")
         log.flush()
 

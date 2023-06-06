@@ -11,6 +11,13 @@ class Longformer(nn.Module):
     A standard Longformer module that outputs the unprocessed
     output of the last transformer layer
 
+    Benchmarks:
+    Transfomer seqlen 4096 = 6090MB
+    Transformer seqlen 8192 = 19202MB
+
+    Longformer seqlen 4096 = 5474MB
+    Longformer seqlen 8192 = 9550MB
+
     Parameters:
     vocab_size (int): Vocabulary size
     max_len (int): Max length

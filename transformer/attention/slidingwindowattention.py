@@ -8,15 +8,12 @@ import math
 
 
 def sliding_chunks_matmul_qk(q, k, w):
-    """
-    Implementation of sliding chunks no overlap
-    """
+    """Implementation of sliding chunks no overlap with one write head"""
     bsz, seqlen, nhead, dhead = q.size()
     assert seqlen % w == 0
-    assert q.size() == k.size()
 
     chunk_q = q.view(bsz, seqlen // w, w, nhead, dhead)
-    chunk_k = k.view(bsz, seqlen // w, w, nhead, dhead)
+    chunk_k = k.view(bsz, seqlen // w, w, 1, dhead)
 
     chunk_k_expanded = torch.stack((
         F.pad(chunk_k[:, :-1], (0, 0, 0, 0, 0, 0, 1, 0), value=0.),
@@ -24,9 +21,9 @@ def sliding_chunks_matmul_qk(q, k, w):
         F.pad(chunk_k[:, 1:], (0, 0, 0, 0, 0, 0, 0, 1), value=0.)
     ), dim=-1)
 
-    assert chunk_k_expanded.shape == (bsz, seqlen // w, w, nhead, dhead, 3)
+    assert chunk_k_expanded.shape == (bsz, seqlen // w, w, 1, dhead, 3)
 
-    diagonal_attn = torch.einsum('bcxhd,bcyhde->bcxhey', (chunk_q, chunk_k_expanded))
+    diagonal_attn = torch.einsum('bcxhd,bcyode->bcxhey', (chunk_q, chunk_k_expanded))
 
     assert diagonal_attn.shape == (bsz, seqlen // w, w, nhead, 3, w)
 
@@ -34,11 +31,12 @@ def sliding_chunks_matmul_qk(q, k, w):
 
 
 def sliding_chunks_matmul_pv(prob, v, w):
-    """Implementation of sliding chunks no overlap"""
-    bsz, seqlen, nhead, dhead = v.size()
+    """Implementation of sliding chunks no overlap with one write head"""
+    bsz, seqlen, _, dhead = v.size()
+    nhead = prob.size(2)
 
     chunk_prob = prob.view(bsz, seqlen // w, w, nhead, 3, w)
-    chunk_v = v.view(bsz, seqlen // w, w, nhead, dhead)
+    chunk_v = v.view(bsz, seqlen // w, w, 1, dhead)
 
     chunk_v_extended = torch.stack((
         F.pad(chunk_v[:, :-1], (0, 0, 0, 0, 0, 0, 1, 0), value=0.0),
@@ -46,9 +44,9 @@ def sliding_chunks_matmul_pv(prob, v, w):
         F.pad(chunk_v[:, 1:], (0, 0, 0, 0, 0, 0, 0, 1), value=0.0),
     ), dim=-1)
 
-    assert chunk_v_extended.shape == (bsz, seqlen // w, w, nhead, dhead, 3)
+    assert chunk_v_extended.shape == (bsz, seqlen // w, w, 1, dhead, 3)
 
-    context = torch.einsum('bcwhpd,bcdhep->bcwhe', (chunk_prob, chunk_v_extended))
+    context = torch.einsum('bcwhpd,bcdoep->bcwhe', (chunk_prob, chunk_v_extended))
 
     assert context.shape == (bsz, seqlen // w, w, nhead, dhead)
 
@@ -70,7 +68,7 @@ class SlidingWindowAttention(nn.Module):
         self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
         self.w_concat = nn.Linear(d_model, d_model, bias=False)
 
-    def forward(self, q, kv, mask=None):
+    def forward(self, q, kv, mask=None, w=512):
         """
         Parameters:
         q:     [batch_size, length, d_model]
@@ -86,12 +84,12 @@ class SlidingWindowAttention(nn.Module):
 
         q /= math.sqrt(self.d_head)
 
-        attn_weights = sliding_chunks_matmul_qk(q, k)
+        attn_weights = sliding_chunks_matmul_qk(q, k, w=w)
         attn_probs = F.softmax(attn_weights, dim=-1)
 
-        out = sliding_chunks_matmul_pv(attn_probs, v)
+        out = sliding_chunks_matmul_pv(attn_probs, v, w=w)
 
-        out = self.concat(out)
+        out = out.view(bsz, length, d_model)
         out = self.w_concat(out)
 
         return out
@@ -112,3 +110,4 @@ class SlidingWindowAttention(nn.Module):
         tensor = tensor.view(batch_size, length, self.n_head, d_tensor).transpose(1, 2)
 
         return tensor
+
