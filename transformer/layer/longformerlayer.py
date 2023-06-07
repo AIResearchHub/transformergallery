@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from transformers import LongformerConfig, LongformerSelfAttention
 
-from ..attention import SlidingWindowAttention
+from ..attention import LocalAttention
 from .feedforward import FeedForward
 
 
@@ -22,7 +22,7 @@ class LongformerLayer(nn.Module):
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
         super(LongformerLayer, self).__init__()
-        self.attention = SlidingWindowAttention(d_model=d_model, n_head=n_head)
+        self.attention = LocalAttention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
 

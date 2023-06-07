@@ -3,7 +3,7 @@
 import torch
 import time
 
-from transformer import TransformerLM, Transformer, TransformerXL, Longformer
+from transformer import *
 from memory import Memory
 from trainer import Trainer
 from dataset import create_bert_data
