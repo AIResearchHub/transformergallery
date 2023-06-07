@@ -29,32 +29,26 @@ class Trainer:
         self.length = burnin + rollout
 
     def step(self):
-        """TODO: accumulating gradients"""
+        X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size, length=self.rollout)
 
-        X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
-
-        loss = self.get_grad(X, Y, states)
-        self.opt.step()
-
-        return loss
-
-    def get_grad(self, X, Y, state):
-        X = X[0]
-        Y = Y[0]
-
-        self.model.zero_grad()
         total_loss = 0
         for i in range(self.rollout):
-            expected, state = self.model(X, state)
-            loss = self.bert_loss(Y, expected)
-            loss.backward()
-            total_loss += loss.item()
+            self.model.zero_grad()
 
-        for x in self.model.parameters():
-            if x.grad is not None:
-                x.grad.data.mul_(1/self.rollout)
+            loss, states = self.get_grad(X[i], Y[i], states)
+            total_loss += loss
 
-        return total_loss
+            self.opt.step()
+
+        return total_loss / self.rollout
+
+    def get_grad(self, X, Y, state):
+
+        expected, state = self.model(X, state)
+        loss = self.bert_loss(Y, expected)
+        loss.backward()
+
+        return loss.item(), state
 
     def bert_loss(self, target, expected):
         """

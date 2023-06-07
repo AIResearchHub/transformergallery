@@ -9,32 +9,51 @@ from trainer import Trainer
 from dataset import create_bert_data
 
 
-def main():
-    data = create_bert_data(max_files=20, max_len=8192)
+def main(max_files=10,
+         max_len=1024,
+         vocab_size=30522,
+         n_layers=4,
+         d_model=512,
+         n_head=8,
+         p=0.1,
+         lr=1e-4,
+         batch_size=16,
+         n_accumulate=1,
+         burnin=0,
+         rollout=5
+         ):
+
+    data = create_bert_data(
+        max_files=max_files,
+        max_len=max_len
+    )
 
     lm = TransformerLM(
-        cls=Longformer,
-        vocab_size=30522,
-        max_len=8192,
-        n_layers=4,
-        d_model=512,
-        n_head=8,
-        p=0.1
+        cls=LongformerXL,
+        vocab_size=vocab_size,
+        max_len=max_len,
+        n_layers=n_layers,
+        d_model=d_model,
+        n_head=n_head,
+        p=p
     )
 
     mem = Memory(
         data=data,
-        init=lm.init_state()
+        init=lm.init_state(),
+        max_len=max_len,
+        n_layers=n_layers,
+        d_model=d_model
     )
 
     trainer = Trainer(
         model=lm,
         memory=mem,
-        lr=1e-4,
-        batch_size=1,
-        n_accumulate=2,
-        burnin=0,
-        rollout=5
+        lr=lr,
+        batch_size=batch_size,
+        n_accumulate=n_accumulate,
+        burnin=burnin,
+        rollout=rollout
     )
 
     filename = f"logs/lm"

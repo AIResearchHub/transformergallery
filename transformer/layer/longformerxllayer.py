@@ -29,10 +29,10 @@ class LongformerXLLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=p)
 
-    def forward(self, x, src_mask=None):
+    def forward(self, x, mem, src_mask=None):
         """Compute the output of the transformer layer"""
         _x = x
-        x = self.attention(q=x, kv=x, mask=src_mask)
+        x = self.attention(q=x, kv=x, mem=mem, mask=src_mask)
 
         x = self.norm1(x + _x)
         x = self.dropout1(x)

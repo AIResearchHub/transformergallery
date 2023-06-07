@@ -8,9 +8,13 @@ from copy import deepcopy
 
 class Memory:
 
-    def __init__(self, data, init):
+    def __init__(self, data, max_len, n_layers, d_model, init=None):
         self.data = data
         self.size = len(data)
+
+        self.max_len = max_len
+        self.n_layers = n_layers
+        self.d_model = d_model
 
         # self.state = [[deepcopy(init).cpu() for _ in range(seq.size(0))] for seq in self.data]
 
@@ -52,7 +56,7 @@ class Memory:
             Y.append(y)
 
             # states.append(self.state[bufferidx][timeidx])
-            states.append(torch.zeros(4, 1, 512, 512))
+            states.append(torch.zeros(self.n_layers, 1, self.max_len, self.d_model))
 
         X = torch.stack(X).cuda()
         Y = torch.stack(Y).cuda()

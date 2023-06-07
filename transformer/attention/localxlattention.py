@@ -35,11 +35,11 @@ def sliding_chunks_matmul_qk(q, k, w):
 
 def sliding_chunks_matmul_pv(prob, v, w):
     """Implementation of sliding chunks no overlap with one write head"""
-    bsz, seqlen, _, dhead = v.size()
-    nhead = prob.size(2)
+    bsz, seqlen, nhead, _ = prob.shape
+    _, memseqlen, _, dhead = v.shape
 
     chunk_prob = prob.view(bsz, seqlen // w, w, nhead, 3, w)
-    chunk_v = v.view(bsz, seqlen // w, w, 1, dhead)
+    chunk_v = v.view(bsz, memseqlen // w, w, 1, dhead)
 
     chunk_v_extended = torch.stack((
         F.pad(chunk_v[:, :-1], (0, 0, 0, 0, 0, 0, 1, 0), value=0.0),
@@ -47,9 +47,9 @@ def sliding_chunks_matmul_pv(prob, v, w):
         F.pad(chunk_v[:, 1:], (0, 0, 0, 0, 0, 0, 0, 1), value=0.0),
     ), dim=-1)
 
-    assert chunk_v_extended.shape == (bsz, seqlen // w, w, 1, dhead, 3)
+    assert chunk_v_extended.shape == (bsz, memseqlen // w, w, 1, dhead, 3)
 
-    context = torch.einsum('bcwhpd,bcdoep->bcwhe', (chunk_prob, chunk_v_extended))
+    context = torch.einsum('bcwhpd,bzdoep->bcwhe', (chunk_prob, chunk_v_extended))
 
     assert context.shape == (bsz, seqlen // w, w, nhead, dhead)
 

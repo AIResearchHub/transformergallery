@@ -41,7 +41,10 @@ class Longformer(nn.Module):
         self.n_layers = n_layers
         self.d_model = d_model
 
-        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.embedding = TransformerEmbedding(vocab_size=vocab_size,
+                                              d_model=d_model,
+                                              max_len=max_len)
+
         self.layers = nn.ModuleList(
             [LongformerLayer(d_model=d_model, ffn_hidden=4 * d_model, n_head=n_head, p=p)
              for _ in range(n_layers)])
