@@ -11,6 +11,7 @@ class RecurrentAttention(nn.Module):
     This attention computes 4 separate queries, 2 keys and 2 values
     from input and recurrent state respectively then
     performs self attention and cross attention
+    It also uses transformer xl cache memory
 
     Parameters:
     d_model (int): Dimension of model

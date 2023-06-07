@@ -9,7 +9,7 @@ from trainer import Trainer
 from dataset import create_bert_data
 
 
-def main(max_files=10,
+def main(max_files=1000,
          max_len=1024,
          vocab_size=30522,
          n_layers=4,
@@ -59,7 +59,7 @@ def main(max_files=10,
     filename = f"logs/lm"
     log = open(filename, "w")
 
-    timesteps = 500
+    timesteps = 100000
     start = time.time()
     for i in range(timesteps):
         loss = trainer.step()

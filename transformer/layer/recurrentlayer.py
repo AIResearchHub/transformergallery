@@ -2,15 +2,15 @@
 
 import torch.nn as nn
 
-from ..attention import XLAttention
+from ..attention import RecurrentAttention
 from .feedforward import FeedForward
 
 
-class XLAttentionLayer(nn.Module):
+class RecurrentLayer(nn.Module):
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
-        super(XLAttentionLayer, self).__init__()
-        self.attention = XLAttention(d_model=d_model, n_head=n_head)
+        super(RecurrentLayer, self).__init__()
+        self.attention = RecurrentAttention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
 
@@ -33,4 +33,3 @@ class XLAttentionLayer(nn.Module):
         x = self.dropout2(x)
 
         return x
-
