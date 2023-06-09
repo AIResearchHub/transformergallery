@@ -1,8 +1,6 @@
 
 
-import torch
 from torch.utils.data import DataLoader
-import time
 
 from transformer import *
 from trainer import Trainer

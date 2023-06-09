@@ -7,13 +7,13 @@ from torch.optim import Adam
 import time
 
 
-def apply_mlm_mask(batch):
+def apply_mlm_mask(batch, mask_prob):
     probs = torch.rand(*batch.shape)
-    masks = (probs < 0.25)
+    masks = (probs < mask_prob)
 
     # create inputs
     inputs = batch.detach() * torch.logical_not(masks)
-    inputs[inputs == 0] == 102
+    inputs[inputs == 0] = 103
 
     # create labels
     labels = batch.detach() * masks
@@ -68,7 +68,7 @@ class Trainer:
 
     def step(self, batch):
         total_loss = 0
-        inputs, targets = apply_mlm_mask(batch)
+        inputs, targets = apply_mlm_mask(batch, mask_prob=0.25)
 
         state = self.model.init_state()
         for t in range(self.rollout):
