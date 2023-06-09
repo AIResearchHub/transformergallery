@@ -1,6 +1,7 @@
 
 
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class TransformerLM(nn.Module):
@@ -26,7 +27,8 @@ class TransformerLM(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1
+                 p=0.1,
+                 device="cuda"
                  ):
 
         super(TransformerLM, self).__init__()
@@ -37,7 +39,8 @@ class TransformerLM(nn.Module):
             n_layers=n_layers,
             d_model=d_model,
             n_head=n_head,
-            p=p
+            p=p,
+            device=device
         )
 
         self.lm_head = nn.Linear(d_model, vocab_size)
@@ -50,7 +53,7 @@ class TransformerLM(nn.Module):
 
     def forward(self, x, state):
         x, state = self.transformer(x, state)
-        x = self.lm_head(x)
+        x = F.log_softmax(self.lm_head(x), dim=-1)
 
         return x, state
 

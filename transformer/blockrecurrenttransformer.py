@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-from .layer import TransformerEmbedding, AttentionLayer, RecurrentLayer
+from .layer import TransformerEmbedding, AttentionLayer, XLAttentionLayer, RecurrentLayer
 
 from block_recurrent_transformer_pytorch import BlockRecurrentTransformer as BlockRecurrentTransformerLucidrains
 
@@ -20,32 +20,36 @@ class BlockRecurrentTransformer(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 device="cuda"
+                 device="cuda",
+                 xl=True
                  ):
         super(BlockRecurrentTransformer, self).__init__()
         self.d_model = d_model
         self.device = device
 
+        layer_cls = XLAttentionLayer if xl else AttentionLayer
+
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
                                               max_len=max_len
                                               )
-        self.layers1 = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                     ffn_hidden=4 * d_model,
-                                                     n_head=n_head,
-                                                     p=p
-                                                     )
+        self.layers1 = nn.ModuleList([layer_cls(d_model=d_model,
+                                                ffn_hidden=4 * d_model,
+                                                n_head=n_head,
+                                                p=p
+                                                )
                                       for _ in range(n_layers // 2)])
         self.recurrent = RecurrentLayer(d_model=d_model,
                                         ffn_hidden=4 * d_model,
                                         n_head=n_head,
-                                        p=p
+                                        p=p,
+                                        xl=xl
                                         )
-        self.layers2 = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                     ffn_hidden=4 * d_model,
-                                                     n_head=n_head,
-                                                     p=p
-                                                     )
+        self.layers2 = nn.ModuleList([layer_cls(d_model=d_model,
+                                                ffn_hidden=4 * d_model,
+                                                n_head=n_head,
+                                                p=p
+                                                )
                                       for _ in range(n_layers - n_layers // 2)])
 
     def init_state(self, batch_size, state_len):

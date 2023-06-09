@@ -49,7 +49,6 @@ class Longformer(nn.Module):
             [LongformerLayer(d_model=d_model, ffn_hidden=4 * d_model, n_head=n_head, p=p)
              for _ in range(n_layers)])
 
-
     def init_state(self, batch_size=1, device="cpu"):
         return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=device)
 

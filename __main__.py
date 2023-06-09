@@ -1,75 +1,63 @@
 
 
 import torch
+from torch.utils.data import DataLoader
 import time
 
 from transformer import *
-from memory import Memory
 from trainer import Trainer
-from dataset import create_bert_data
+from dataset import PG19Dataset
 
 
-def main(max_files=1000,
-         max_len=1024,
+def main(max_files=2,
+         max_len=512,
          vocab_size=30522,
-         n_layers=4,
-         d_model=512,
+         n_layers=1,
+         d_model=256,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=16,
+         batch_size=2,
          n_accumulate=1,
          burnin=0,
-         rollout=5
+         rollout=1,
+         device="cpu"
          ):
 
-    data = create_bert_data(
+    dataset = PG19Dataset(
         max_files=max_files,
-        max_len=max_len
+        seq_len=max_len,
+        block_len=burnin+rollout,
+        device=device
     )
 
+    dataloader = DataLoader(dataset, batch_size=batch_size)
+
     lm = TransformerLM(
-        cls=LongformerXL,
+        cls=Transformer,
         vocab_size=vocab_size,
         max_len=max_len,
         n_layers=n_layers,
         d_model=d_model,
         n_head=n_head,
-        p=p
-    )
-
-    mem = Memory(
-        data=data,
-        init=lm.init_state(),
-        max_len=max_len,
-        n_layers=n_layers,
-        d_model=d_model
+        p=p,
+        device=device
     )
 
     trainer = Trainer(
         model=lm,
-        memory=mem,
+        dataloader=dataloader,
         lr=lr,
         batch_size=batch_size,
         n_accumulate=n_accumulate,
         burnin=burnin,
-        rollout=rollout
+        rollout=rollout,
+        device=device
     )
 
-    filename = f"logs/lm"
-    log = open(filename, "w")
-
-    timesteps = 100000
-    start = time.time()
-    for i in range(timesteps):
-        loss = trainer.step()
-
-        print(f"Time: {time.time() - start} \t Loss: {loss} \t Update/Sec: {(time.time() - start) / (i + 1)}")
-        log.write(f"{time.time() - start}, {loss}\n")
-        log.flush()
-
-        if i % 100 == 0:
-            torch.save(trainer.model, "saved/final")
+    epochs = 10
+    for i in range(epochs):
+        trainer.run_epoch()
 
 
 if __name__ == "__main__":

@@ -1,57 +1,36 @@
-from pytorch_pretrained_bert import BertTokenizer
 
-import logging
-logging.getLogger("pytorch_pretrained_bert.tokenization").setLevel(logging.ERROR)
 
 import torch
-import os
+from torch.utils.data import Dataset
+
+import random
+
+from utils import create_pg19_data
 
 
-def read_data(folderpath, max_files=500):
-    files = os.listdir(folderpath)
-
-    data = []
-    for file in files[:max_files]:
-
-        path = os.path.join(folderpath, file)
-        with open(path, 'r') as f:
-            content = "".join(f.readlines())
-            data.append(content)
-
-    return data
-
-
-def tokenize(texts):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
-    ids = []
-    for text in texts:
-        ids.append(tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text)))
-
-    return ids
-
-
-def partition(ids, max_len):
+class PG19Dataset(Dataset):
     """
-    partition id in ids into blocks of max_len,
-    remove last block to make sure every block is the same size
+    data = List of torch tensors with (block_len, seq_len)
+    seq_len = sequence length to be fed into model per timestep e.g. 2 = (2, 512)
+    device = cuda or cpu
     """
 
-    books = []
-    for id in ids:
-        book = torch.tensor([id[i:i+max_len] for i in range(0, len(id), max_len)][:-1], dtype=torch.int32)
-        if book.size(0) > 30:
-            books.append(book)
+    def __init__(self, max_files, seq_len, block_len, device):
+        super().__init__()
+        #  [(total_len, seq_len), ...]
+        self.data = create_pg19_data(path="data/pg19/train", max_len=seq_len, max_files=max_files)
+        self.seq_len = seq_len
+        self.block_len = block_len
+        self.device = device
 
-    return books
+        self.size = sum([x.size(0) for x in self.data]) // block_len
 
+    def __getitem__(self, index):
+        bidx = random.randrange(0, len(self.data))
+        tidx = random.randrange(0, self.data[bidx].size(0) - self.block_len + 1)
+        data = self.data[bidx][tidx:tidx+self.block_len].long()
+        return data.to(self.device)
 
-def create_bert_data(path="data/pg19/train", max_len=512, max_files=30):
-    """
-    :return: List[Tensor(length, max_len)], None
-    """
-
-    data = partition(tokenize(read_data(path, max_files=max_files)), max_len=max_len)
-
-    return data
+    def __len__(self):
+        return self.size
 

@@ -36,7 +36,8 @@ class Transformer(nn.Module):
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
-                                              max_len=max_len)
+                                              max_len=max_len,
+                                              device=device)
 
         self.layers = nn.ModuleList([AttentionLayer(d_model=d_model,
                                                     ffn_hidden=4 * d_model,

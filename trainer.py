@@ -1,26 +1,46 @@
 
 
+import torch
 import torch.nn as nn
 from torch.optim import Adam
+
+import time
+
+
+def apply_mlm_mask(batch):
+    probs = torch.rand(*batch.shape)
+    masks = (probs < 0.25)
+
+    # create inputs
+    inputs = batch.detach() * torch.logical_not(masks)
+    inputs[inputs == 0] == 102
+
+    # create labels
+    labels = batch.detach() * masks
+
+    return inputs.long(), labels.long()
 
 
 class Trainer:
 
     def __init__(self,
                  model,
-                 memory,
+                 dataloader,
                  lr,
                  batch_size,
                  n_accumulate,
                  burnin,
                  rollout,
+                 device
                  ):
 
-        self.model = nn.DataParallel(model).cuda()
+        self.model = model
+        if device == "cuda":
+            self.model = nn.DataParallel(self.model).cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
         self.criterion = nn.NLLLoss(ignore_index=0)
 
-        self.memory = memory
+        self.dataloader = dataloader
         self.batch_size = batch_size
         self.n_accumulate = n_accumulate
 
@@ -28,32 +48,47 @@ class Trainer:
         self.rollout = rollout
         self.length = burnin + rollout
 
-    def step(self):
-        X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size, length=self.rollout)
+        self.log = open(f"logs/lm", "w")
 
+    def run_epoch(self):
+
+        start = time.time()
+        for i, batch in enumerate(self.dataloader):
+            # batch (bsz, block_len, seq_len)
+            loss = self.step(batch)
+
+            self.log.write(f"{time.time() - start}, {loss}\n")
+            self.log.flush()
+
+            if i % 5 == 0:
+                print(f"Time: {time.time() - start} \t Loss: {loss} \t Update/Sec: {(time.time() - start) / (i + 1)}")
+
+            if i % 10000 == 0:
+                torch.save(self.model, "saved/final")
+
+    def step(self, batch):
         total_loss = 0
-        for i in range(self.rollout):
-            self.model.zero_grad()
+        inputs, targets = apply_mlm_mask(batch)
 
-            loss, states = self.get_grad(X[i], Y[i], states)
-            total_loss += loss
-
+        state = self.model.init_state()
+        for t in range(self.rollout):
+            expected, state = self.model(inputs[:, t, :], state=state)
+            loss = self.bert_loss(expected, targets[:, t, :])
+            loss.backward()
             self.opt.step()
 
-        return total_loss / self.rollout
+            total_loss += loss
 
-    def get_grad(self, X, Y, state):
+        return total_loss
 
-        expected, state = self.model(X, state)
-        loss = self.bert_loss(Y, expected)
-        loss.backward()
-
-        return loss.item(), state
-
-    def bert_loss(self, target, expected):
+    def bert_loss(self, expected, target):
         """
-        :param target:   [batch_size, max_len]
-        :param expected: [batch_size, max_len, vocab_size]
+        negative log likelihood takes in log probabilities and labels
+        and outputs loss
+
+        Parameters:
+            expected (batch_size, max_len, vocab_size)
+            target (batch_size, max_len)
         """
         assert target.shape == (self.batch_size, target.size(1))
         assert expected.shape == (self.batch_size, target.size(1), expected.size(2))
