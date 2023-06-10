@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class RecurrentAttention(nn.Module):
@@ -60,11 +61,11 @@ class RecurrentAttention(nn.Module):
         ks, vs = ks.unsqueeze(1), vs.unsqueeze(1)
 
         # perform self attention and cross attention
-        x, _ = self.attention(qx1, kx, vx, mask=mask)
-        s, _ = self.attention(qs1, ks, vs, mask=mask)
+        x = F.scaled_dot_product_attention(qx1, kx, vx, attn_mask=mask)
+        s = F.scaled_dot_product_attention(qs1, ks, vs, attn_mask=mask)
 
-        xs, _ = self.attention(qx2, ks, vs, mask=mask)
-        sx, _ = self.attention(qs2, kx, vx, mask=mask)
+        xs = F.scaled_dot_product_attention(qx2, ks, vs, attn_mask=mask)
+        sx = F.scaled_dot_product_attention(qs2, kx, vx, attn_mask=mask)
 
         # concatenate and linear projection
         x_proj = self.concat(torch.concat((xs, x), dim=-1))

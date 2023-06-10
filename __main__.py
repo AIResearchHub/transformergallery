@@ -32,7 +32,7 @@ def main(max_files=2,
     dataloader = DataLoader(dataset, batch_size=batch_size)
 
     lm = TransformerLM(
-        cls=Transformer,
+        cls=BlockRecurrentTransformer,
         vocab_size=vocab_size,
         max_len=max_len,
         n_layers=n_layers,

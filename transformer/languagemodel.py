@@ -46,7 +46,7 @@ class TransformerLM(nn.Module):
         self.lm_head = nn.Linear(d_model, vocab_size)
 
     def init_state(self):
-        return self.transformer.init_state()
+        return self.transformer.get_init_state()
 
     def state_forward(self, x, state):
         return self.transformer.state_forward(x, state)

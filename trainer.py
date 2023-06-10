@@ -70,7 +70,7 @@ class Trainer:
         total_loss = 0
         inputs, targets = apply_mlm_mask(batch, mask_prob=0.25)
 
-        state = self.model.init_state()
+        state = None
         for t in range(self.rollout):
             expected, state = self.model(inputs[:, t, :], state=state)
             loss = self.bert_loss(expected, targets[:, t, :])
