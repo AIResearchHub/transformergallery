@@ -87,10 +87,10 @@ class Trainer:
         for t in range(self.rollout):
             expected, state = self.model(inputs[:, t, :], state=state)
             loss = self.bert_loss(expected, targets[:, t, :])
-            self.optim_schedule.zero_grad()
+            self.opt_schedule.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
-            self.optim_schedule.step_and_update_lr()
+            self.opt_schedule.step_and_update_lr()
 
             total_loss += loss.item()
 
