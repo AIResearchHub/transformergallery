@@ -8,11 +8,13 @@ import time
 
 
 def apply_mlm_mask(batch, mask_prob):
+    device = batch.device
+
     probs = torch.rand(*batch.shape)
-    masks = (probs < mask_prob)
+    masks = (probs < mask_prob).to(device)
 
     # create inputs
-    inputs = batch.detach() * torch.logical_not(masks)
+    inputs = batch.detach() * torch.logical_not(masks).to(device)
     inputs[inputs == 0] = 103
 
     # create labels
@@ -34,9 +36,9 @@ class Trainer:
                  device
                  ):
 
-        self.model = model
+        self.model = nn.DataParallel(model)
         if device == "cuda":
-            self.model = nn.DataParallel(self.model).cuda()
+            self.model = self.model.cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
         self.criterion = nn.NLLLoss(ignore_index=0)
 
@@ -49,19 +51,25 @@ class Trainer:
         self.length = burnin + rollout
 
         self.log = open(f"logs/lm", "w")
+        self.start = time.time()
+        self.updates = 0
 
-    def run_epoch(self):
+    def run_epoch(self, epoch):
 
-        start = time.time()
         for i, batch in enumerate(self.dataloader):
             # batch (bsz, block_len, seq_len)
             loss = self.step(batch)
 
-            self.log.write(f"{time.time() - start}, {loss}\n")
+            self.log.write(f"{time.time() - self.start}, {loss}\n")
             self.log.flush()
 
+            self.updates += 1
+
             if i % 5 == 0:
-                print(f"Time: {time.time() - start} \t Loss: {loss} \t Update/Sec: {(time.time() - start) / (i + 1)}")
+                print(f"Epoch: {epoch} \t "
+                      f"Time: {time.time() - self.start} \t "
+                      f"Loss: {loss} \t "
+                      f"Update/Sec: {(time.time() - self.start) / self.updates}")
 
             if i % 10000 == 0:
                 torch.save(self.model, "saved/final")
@@ -70,11 +78,12 @@ class Trainer:
         total_loss = 0
         inputs, targets = apply_mlm_mask(batch, mask_prob=0.25)
 
-        state = self.model.init_state()
+        state = self.model.module.init_state()
         for t in range(self.rollout):
             expected, state = self.model(inputs[:, t, :], state=state)
             loss = self.bert_loss(expected, targets[:, t, :])
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
             self.opt.step()
 
             total_loss += loss
@@ -90,8 +99,8 @@ class Trainer:
             expected (batch_size, max_len, vocab_size)
             target (batch_size, max_len)
         """
-        assert target.shape == (self.batch_size, target.size(1))
-        assert expected.shape == (self.batch_size, target.size(1), expected.size(2))
+        assert target.shape == (target.size(0), target.size(1))
+        assert expected.shape == (target.size(0), target.size(1), expected.size(2))
 
         expected = expected.transpose(1, 2)
 

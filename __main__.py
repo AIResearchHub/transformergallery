@@ -7,19 +7,19 @@ from trainer import Trainer
 from dataset import PG19Dataset
 
 
-def main(max_files=2,
+def main(max_files=10,
          max_len=512,
          vocab_size=30522,
-         n_layers=1,
-         d_model=256,
+         n_layers=4,
+         d_model=512,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=2,
+         batch_size=32,
          n_accumulate=1,
          burnin=0,
          rollout=1,
-         device="cpu"
+         device="cuda"
          ):
 
     dataset = PG19Dataset(
@@ -53,9 +53,9 @@ def main(max_files=2,
         device=device
     )
 
-    epochs = 10
-    for i in range(epochs):
-        trainer.run_epoch()
+    epochs = 100
+    for epoch in range(epochs):
+        trainer.run_epoch(epoch)
 
 
 if __name__ == "__main__":
