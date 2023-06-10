@@ -33,6 +33,7 @@ class Trainer:
                  lr,
                  batch_size,
                  n_accumulate,
+                 seqlen,
                  burnin,
                  rollout,
                  warmup_steps,
@@ -51,6 +52,7 @@ class Trainer:
         self.batch_size = batch_size
         self.n_accumulate = n_accumulate
 
+        self.seqlen = seqlen
         self.burnin = burnin
         self.rollout = rollout
         self.length = burnin + rollout
@@ -95,7 +97,7 @@ class Trainer:
 
             total_loss += loss.item()
 
-        return total_loss
+        return total_loss / (self.rollout * self.seqlen)
 
     def bert_loss(self, expected, target):
         """
