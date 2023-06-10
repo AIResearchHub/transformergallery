@@ -19,6 +19,7 @@ def main(max_files=10,
          n_accumulate=1,
          burnin=0,
          rollout=1,
+         warmup_steps=100,
          device="cuda"
          ):
 
@@ -50,6 +51,7 @@ def main(max_files=10,
         n_accumulate=n_accumulate,
         burnin=burnin,
         rollout=rollout,
+        warmup_steps=warmup_steps,
         device=device
     )
 

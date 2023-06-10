@@ -33,6 +33,13 @@ class TransformerLM(nn.Module):
 
         super(TransformerLM, self).__init__()
 
+        self.vocab_size = vocab_size
+        self.max_len = max_len
+        self.n_layers = n_layers
+        self.d_model = d_model
+        self.n_head = n_head
+        self.p = p
+
         self.transformer = cls(
             vocab_size=vocab_size,
             max_len=max_len,

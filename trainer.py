@@ -6,6 +6,8 @@ from torch.optim import Adam
 
 import time
 
+from optim_schedule import ScheduledOptim
+
 
 def apply_mlm_mask(batch, mask_prob):
     device = batch.device
@@ -33,13 +35,16 @@ class Trainer:
                  n_accumulate,
                  burnin,
                  rollout,
-                 device
+                 warmup_steps,
+                 device,
                  ):
 
         self.model = nn.DataParallel(model)
         if device == "cuda":
             self.model = self.model.cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
+        self.opt_schedule = ScheduledOptim(self.opt, self.model.d_model, n_warmup_steps=warmup_steps)
+
         self.criterion = nn.NLLLoss(ignore_index=0)
 
         self.dataloader = dataloader
@@ -82,11 +87,12 @@ class Trainer:
         for t in range(self.rollout):
             expected, state = self.model(inputs[:, t, :], state=state)
             loss = self.bert_loss(expected, targets[:, t, :])
+            self.optim_schedule.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
-            self.opt.step()
+            self.optim_schedule.step_and_update_lr()
 
-            total_loss += loss
+            total_loss += loss.item()
 
         return total_loss
 
