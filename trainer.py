@@ -43,7 +43,7 @@ class Trainer:
         if device == "cuda":
             self.model = self.model.cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
-        self.opt_schedule = ScheduledOptim(self.opt, self.model.d_model, n_warmup_steps=warmup_steps)
+        self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)
 
         self.criterion = nn.NLLLoss(ignore_index=0)
 
