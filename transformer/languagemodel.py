@@ -28,7 +28,8 @@ class TransformerLM(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 device="cuda"
+                 device="cuda",
+                 **kwargs
                  ):
 
         super(TransformerLM, self).__init__()
@@ -47,7 +48,8 @@ class TransformerLM(nn.Module):
             d_model=d_model,
             n_head=n_head,
             p=p,
-            device=device
+            device=device,
+            **kwargs
         )
 
         self.lm_head = nn.Linear(d_model, vocab_size)
