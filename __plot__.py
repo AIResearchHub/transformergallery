@@ -11,10 +11,9 @@ data = pd.read_csv(latestfile,
                           "Loss"]
                    )
 
-plt.subplot(2, 1, 1)
-plt.plot(data["Time"])
+print("Total Time (sec): ", data["Time"].iloc[-1])
+print("Final Loss: ", data["Loss"].iloc[-1])
 
-plt.subplot(2, 1, 2)
-plt.plot(data["Loss"])
+plt.plot(data["Time"], data["Loss"])
 plt.show()
 
