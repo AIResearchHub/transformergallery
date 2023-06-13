@@ -6,4 +6,5 @@ from .recurrentattention import RecurrentAttention
 from .localattention import LocalAttention
 from .localxlattention import LocalXLAttention
 from .axialattention import AxialAttention
+from .knnattention import KNNAttention
 

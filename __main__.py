@@ -15,12 +15,12 @@ def main(max_files=20,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=32,
+         batch_size=1,
          n_accumulate=1,
          burnin=0,
          rollout=1,
          warmup_steps=100,
-         device="cuda"
+         device="cpu"
          ):
 
     dataset = PG19Dataset(
@@ -33,7 +33,7 @@ def main(max_files=20,
     dataloader = DataLoader(dataset, batch_size=batch_size)
 
     lm = TransformerLM(
-        cls=Transformer,
+        cls=Unlimiformer,
         vocab_size=vocab_size,
         max_len=max_len,
         n_layers=n_layers,
