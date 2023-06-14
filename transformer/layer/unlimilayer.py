@@ -9,7 +9,7 @@ from .feedforward import FeedForward
 
 class UnlimiLayer(nn.Module):
 
-    def __init__(self, d_model, ffn_hidden, n_head, p):
+    def __init__(self, d_model, ffn_hidden, n_head, p, bsz, device):
         super(UnlimiLayer, self).__init__()
         self.attention = Attention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
@@ -17,8 +17,8 @@ class UnlimiLayer(nn.Module):
 
         self.knn_attention = KNNAttention(d_model=d_model,
                                           n_head=n_head,
-                                          bsz=32,
-                                          topk=1)
+                                          bsz=bsz,
+                                          device=device)
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=p)
 

@@ -7,7 +7,7 @@ from trainer import Trainer
 from dataset import PG19Dataset
 
 
-def main(max_files=20,
+def main(max_files=5,
          max_len=512,
          vocab_size=30522,
          n_layers=4,
@@ -15,7 +15,7 @@ def main(max_files=20,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=1,
+         batch_size=2,
          n_accumulate=1,
          burnin=0,
          rollout=1,
@@ -42,6 +42,8 @@ def main(max_files=20,
         p=p,
         device=device,
         w=512,
+        bsz=batch_size,
+        topk=1,
     )
 
     trainer = Trainer(

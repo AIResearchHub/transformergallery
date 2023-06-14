@@ -16,6 +16,7 @@ class Unlimiformer(nn.Module):
                  n_head=8,
                  p=0.1,
                  device="cuda",
+                 bsz=1,
                  **kwargs
                  ):
 
@@ -30,7 +31,9 @@ class Unlimiformer(nn.Module):
         self.layers = nn.ModuleList([UnlimiLayer(d_model=d_model,
                                                  ffn_hidden=4 * d_model,
                                                  n_head=n_head,
-                                                 p=p)
+                                                 p=p,
+                                                 bsz=bsz,
+                                                 device=device)
                                     for _ in range(n_layers)])
 
         self.reset()
