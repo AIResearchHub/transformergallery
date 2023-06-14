@@ -47,7 +47,7 @@ class LongformerLayer(nn.Module):
         return x
 
 
-class LongformerLayerPrewritten(nn.Module):
+class LongformerLayerHuggingface(nn.Module):
     """
     Class representing a standard transformer layer. This layer includes Longformer self-attention,
     normalization, dropout, and a feed-forward network.
@@ -60,7 +60,7 @@ class LongformerLayerPrewritten(nn.Module):
     """
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
-        super(LongformerLayerPrewritten, self).__init__()
+        super(LongformerLayerHuggingface, self).__init__()
         self.config = LongformerConfig(hidden_size=d_model,
                                        intermediate_size=ffn_hidden,
                                        num_attention_heads=n_head,

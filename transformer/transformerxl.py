@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 from .layer import TransformerEmbedding, XLAttentionLayer
+from transformers import TransfoXLModel
 
 
 class TransformerXL(nn.Module):
@@ -78,3 +79,23 @@ class TransformerXL(nn.Module):
         next_state = torch.stack(next_state)
 
         return x, next_state
+
+
+class TransformerXLHuggingface:
+
+    def __init__(self, pretrained="transfo-xl-wt103", **kwargs):
+        super(TransformerXLHuggingface, self).__init__()
+
+        self.model = TransfoXLModel.from_pretrained(pretrained)
+
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(1, batch_size, 1, 1, device=device)
+
+    def state_forward(self, ids, state):
+        return state
+
+    def forward(self, ids, state):
+        x = self.model(ids)
+
+        return x, state
+

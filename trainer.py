@@ -63,7 +63,6 @@ class Trainer:
 
     def run_epoch(self, epoch):
 
-        start = time.time()
         for i, batch in enumerate(self.dataloader):
             # batch (bsz, block_len, seq_len)
             loss = self.step(batch)
@@ -113,4 +112,5 @@ class Trainer:
 
         expected = expected.transpose(1, 2)
 
-        return self.criterion(expected, target)
+        loss = self.criterion(expected, target)
+        return loss.mean()

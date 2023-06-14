@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 from .layer import TransformerEmbedding, LongformerLayer
+from transformers import LongformerModel
 
 
 class Longformer(nn.Module):
@@ -50,7 +51,7 @@ class Longformer(nn.Module):
              for _ in range(n_layers)])
 
     def init_state(self, batch_size=1, device="cpu"):
-        return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=device)
+        return torch.zeros(1, batch_size, 1, 1, device=device)
 
     def state_forward(self, ids, state):
         """Returns next recurrent state, since standard transformer just return original state"""
@@ -76,3 +77,23 @@ class Longformer(nn.Module):
             # print(x.shape)
 
         return x, state
+
+
+class LongformerHuggingface(nn.Module):
+
+    def __init__(self, pretrained="allenai/longformer-base-4096", **kwargs):
+        super(LongformerHuggingface, self).__init__()
+
+        self.model = LongformerModel.from_pretrained(pretrained)
+
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(1, batch_size, 1, 1, device=device)
+
+    def state_forward(self, ids, state):
+        return state
+
+    def forward(self, ids, state):
+        output = self.model(ids)
+
+        return output.last_hidden_state, state
+

@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 from .layer import TransformerEmbedding, AttentionLayer
+from transformers import BertModel
 
 
 class Transformer(nn.Module):
@@ -72,3 +73,23 @@ class Transformer(nn.Module):
             x = layer(x)
 
         return x, state
+
+
+class TransformerHuggingface:
+
+    def __init__(self, pretrained="bert-base-uncased", **kwargs):
+        super(TransformerHuggingface, self).__init__()
+
+        self.model = BertModel.from_pretrained(pretrained)
+
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(1, batch_size, 1, 1, device=device)
+
+    def state_forward(self, ids, state):
+        return state
+
+    def forward(self, ids, state):
+        x = self.model(ids)
+
+        return x, state
+
