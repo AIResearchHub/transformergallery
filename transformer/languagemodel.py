@@ -54,15 +54,18 @@ class TransformerLM(nn.Module):
 
         self.lm_head = nn.Linear(d_model, vocab_size)
 
-    def init_state(self):
-        return self.transformer.get_init_state()
+    def reset(self):
+        return self.transformer.reset()
 
-    def state_forward(self, x, state):
-        return self.transformer.state_forward(x, state)
+    def set_state(self, state):
+        return self.transformer.set_state(state)
 
-    def forward(self, x, state):
-        x, state = self.transformer(x, state)
+    def get_state(self):
+        return self.transformer.get_state()
+
+    def forward(self, x):
+        x = self.transformer(x)
         x = F.log_softmax(self.lm_head(x), dim=-1)
 
-        return x, state
+        return x
 

@@ -50,14 +50,18 @@ class Longformer(nn.Module):
             [LongformerLayer(d_model=d_model, ffn_hidden=4 * d_model, n_head=n_head, p=p)
              for _ in range(n_layers)])
 
-    def init_state(self, batch_size=1, device="cpu"):
-        return torch.zeros(1, batch_size, 1, 1, device=device)
+        self.reset()
 
-    def state_forward(self, ids, state):
-        """Returns next recurrent state, since standard transformer just return original state"""
-        return state
+    def reset(self):
+        self.state = None
 
-    def forward(self, ids, state):
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
+
+    def forward(self, ids):
         """
         Computes transformer output
 
@@ -76,7 +80,7 @@ class Longformer(nn.Module):
             x = layer(x)
             # print(x.shape)
 
-        return x, state
+        return x
 
 
 class LongformerHuggingface(nn.Module):

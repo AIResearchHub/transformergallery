@@ -44,6 +44,8 @@ def main(seq_len=4096,
         p=p,
         device=device,
         w=512,
+        bsz=batch_size,
+        topk=1,
     )
 
     trainer = Trainer(
