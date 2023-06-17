@@ -17,10 +17,21 @@ A query will be denoted by $q$.
 
 There are much more to queries, keys, and values, but, for the purposes of understanding attention, the information above suffices.  If you are intrested in databases beyond the bounds of attention, or simply want more information, we have provided some resources !!!WHERE!!!.
 
-## The formula for attention
+## The General Formula for Attention
 
-The 
+The general formula for attention is as follows:
 
+$$ Attention(q, \textbf{D}) = \Sigma_{i}similarity(q, k_{i})v_{i} $$ where \textbf{D} := \{ (k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n}), and $q$ is a query.
+
+First, let's compare our new attention formula to searching a database using queries, keys, and values.  
+
+When searching a database, we often look for absolute matches, meaning the query and key are identical (similarity = 1).  If we have one student named "John Doe" in our registrar, when we query our database for "John Doe", we expect the similarity of the query and keys to be 0 everywhere except when the key is "John Doe".  Therefore, we'd have a image:
+
+** 1D vector with query John Doe on dimention, and all the keys with a 1 hot for JD **
+
+We'd also call this query/key vector a "one-hot matrix".  Intuitively, we can think of this version of query/key relationship as just a true/false one.
+
+In fact, the above example is a special version of attention
 
 
 Sources:
