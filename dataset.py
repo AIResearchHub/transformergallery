@@ -1,11 +1,11 @@
 
 
-import torch
 from torch.utils.data import Dataset
-
+from datasets import load_dataset
 import random
+import time
 
-from utils import create_pg19_data
+from utils import *
 
 
 class PG19Dataset(Dataset):
@@ -15,10 +15,15 @@ class PG19Dataset(Dataset):
     device = cuda or cpu
     """
 
-    def __init__(self, max_files, seq_len, block_len, device):
+    def __init__(self, cache_dir, split, seq_len, block_len, device):
         super().__init__()
-        #  [(total_len, seq_len), ...]
-        self.data = create_pg19_data(path="data/pg19/train", max_len=seq_len, max_files=max_files)
+        #  List[(total_len, seq_len)]
+        self.data = load_dataset("pg19", split=split, cache_dir=cache_dir)
+        print("Dataset loaded")
+        start = time.time()
+        self.data = partition(tokenize([data["text"] for data in self.data]), max_len=seq_len)
+        print("Dataset tokenized and partitioned in ", time.time() - start)
+
         self.seq_len = seq_len
         self.block_len = block_len
         self.device = device
