@@ -26,6 +26,9 @@ class UnlimiLayer(nn.Module):
         self.norm3 = nn.LayerNorm(d_model)
         self.dropout3 = nn.Dropout(p=p)
 
+    def reset(self):
+        self.knn_attention.reset()
+
     def forward(self, x, src_mask=None):
         """Compute the output of the transformer layer"""
 

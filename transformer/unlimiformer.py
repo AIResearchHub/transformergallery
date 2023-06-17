@@ -39,6 +39,8 @@ class Unlimiformer(nn.Module):
         self.reset()
 
     def reset(self):
+        for layer in self.layers:
+            layer.reset()
         self.state = None
 
     def set_state(self, state):
