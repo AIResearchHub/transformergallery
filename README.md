@@ -50,7 +50,24 @@ Our similarity function can take many forms depending on the task at hand; the b
 
 ## Self Attention
 
-Let's start to get into some real natural language processing (NLP) with the hopes of building towards transformer architecture.  Self attention is our first big building block to doing so.
+Self attention is perhaps the most complicated and most integral part of the transformer model.  Before we explore the math and functions behind it, let's cover some intuition.  
+
+If attention is how much we decide to weight certain features, then self attention naturally follows as how much we decide to weight our own features.  Let's start with an example:
+
+"When he saw his owner, the dog was <blank>, so he wagged his tail"
+
+Try to guess what word best suits the <blank> token.  Chances are, if you know anything about dogs, you know that dogs are happy when they see their owners and that wagging their tail is an experssion of their happiness.
+
+Taking certain words into context, like "owner", "dog", and "wagged", we can guess that the <blank> is probably "happy" or "excited".  For the example's sake, let's assume that the correct answer is "happy".
+
+Let's now fit our example into the query, key, value paradigm.  In our sentnece:
+
+"When he saw his owner, the dog was happy, so he wagged his tail"
+
+we treat all the separate words as keys, and, continuing our above exmaple, let's have "happy" as our query
+
+
+
 
 
 
