@@ -77,8 +77,12 @@ What we've just done is map out how important each key (column) is to each query
 
 **Math**
 
+Let's start from the first step and build up to getting a self attention matrix.
 
 
+Machines speak numbers, so we need to take our words and put them into vector form.  MORE NEEDED  Thankfully, there are plenty of pretrained algorithms like GloVe or Word2Vec that can do this "embedding" for us.  
+
+Generalizing a bit, let's say that we have n number of words in our input sentence, and our word to vector algorithm returns a vector of d dimentions for each word.  After vectorizing, then, we'd have a matrix $X \in \mathbdd{R}^{n \cross d}$ that represents the input in numerical form which each row of $X$ being a word of the input.
 
 
 
@@ -89,5 +93,6 @@ https://www.mongodb.com/databases/key-value-database
 https://www.educative.io/blog/what-is-database-query-sql-nosql
 https://www.youtube.com/watch?v=OyFJWRnt_AY&ab_channel=PascalPoupart
 https://www.youtube.com/watch?v=i_pfHD4P_wg&ab_channel=SebastianRaschka
+https://theaisummer.com/self-attention/
 
 
