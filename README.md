@@ -89,6 +89,8 @@ Next, we need to get our keys, queries, and values matrices.  First, we'll go ov
 For in input $X \in \mathbb{R}^{n \times d}$ and trained weights $W_{Q} \in \mathbb{R}^{d \times d_{Q}},  W_{K} \in \mathbb{R}^{d \times d_{K}}, W_{V} \in \mathbb{R}^{d \times d_{V}}$, where $d_{Q}, d_{K}, d_{V} \in \mathbb{R} \text{ s.t. } d_{Q} = d_{K}$ are the amount of columns in their respective weight matrices, $$Q = XW_{Q}, K = XW_{K}, V = XW_{V}$$
 Which means that $Q \in \mathbb{R}^{d \times d_{Q}}, K \in \mathbb{R}^{d \times d_{K}}, V \in \mathbb{R}^{d \times d_{V}}$.
 
+Ok, so that might seem like gibberish, but let's decipher what is being said in the math.  
+
 
 
 
