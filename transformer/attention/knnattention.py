@@ -25,11 +25,14 @@ class KNNAttention(nn.Module):
         self.n_head = n_head
         self.bsz = bsz
 
-        self.memory = KNNMemory(d_model, bsz, device)
+        self.memory = KNNMemory(d_model // n_head, bsz, device)
 
         self.w_q = nn.Linear(d_model, d_model, bias=False)
         self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
         self.w_concat = nn.Linear(d_model, d_model, bias=False)
+
+        # memorizing transformer gate
+        self.bias = nn.Parameter(torch.randn(d_model // n_head), requires_grad=True)
 
     def reset(self):
         self.memory.reset()
@@ -43,26 +46,30 @@ class KNNAttention(nn.Module):
             q (bsz, seqlen, dim): hidden states to compute queries
             kv (bsz, seqlen, dim): hidden states to store in knn memory
         """
-        # q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
-        # q, k, v = rearrange(q, "b l (h d) -> b h l d"), k.unsqueeze(1), v.unsqueeze(1)
+        q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
+        k, v = F.normalize(k), F.normalize(v)
 
-        q = self.w_q(q)
+        self.memory.add(torch.stack((k, v), dim=-2))
 
-        # knn memory
-        # same keys and values for each attention head
-        # so only need to search once per token
-        self.memory.add(kv)
+        # perform local attention
+        q, k, v = rearrange(q, 'b l (h d) -> b h l d', h=self.n_head), k.unsqueeze(1), v.unsqueeze(1)
+        local_attn = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+
+        # get cached keys and values from memory
         mem = self.memory.search(q, topk=topk)
+        k, v = mem.unbind(2, dim=-2)
+        k, v = k.unsqueeze(1), v.unsqueeze(1)
 
-        # is this efficient?
-        mem_k, mem_v = self.w_kv(mem).chunk(2, dim=-1)
+        # perform external memory attention
+        retrieved_attn = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
 
-        q, k, v = rearrange(q, "b l (h d) -> b h l d", h=self.n_head), mem_k.unsqueeze(1), mem_v.unsqueeze(1)
+        # is the sigmoid needed?
+        # gate = F.sigmoid(self.bias)
+        # out = retrieved_attn * gate + local_attn * (1 - gate)
 
-        # attention reformulation here?
-        out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+        out = local_attn + retrieved_attn
 
-        out = rearrange(out, 'b h l d -> b l (h d)')
+        out = rearrange(out, 'b h l d -> b l (h d)', h=self.n_head)
         out = self.w_concat(out)
 
         return out
@@ -145,6 +152,7 @@ class KNN:
         self.keys = []
 
         # what is the M for?
+        # approximate kNN memory
         self.index = faiss.IndexHNSWFlat(dim, M, faiss.METRIC_INNER_PRODUCT)
         self.reset()
 
@@ -163,11 +171,13 @@ class KNN:
     def add(self, x):
         # if not self.is_trained:
         #     self.train(x)
+        keys = np.ascontiguousarray(x[..., 0, :])
 
-        self.index.add(x)
+        self.index.add(keys)
 
     def search_and_reconstruct(self, queries, k):
         """how do u even perform more than topk=1? how does that even work?"""
+        print(queries.shape)
         seqlen, dim = queries.shape
         scores, values, vectors = self.index.search_and_reconstruct(queries, k)
         vectors = vectors.reshape(seqlen, dim)
