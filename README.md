@@ -89,7 +89,11 @@ Next, we need to get our keys, queries, and values matrices.  First, we'll go ov
 For in input $X \in \mathbb{R}^{n \times d}$ and trained weights $W_{Q} \in \mathbb{R}^{d \times d_{Q}},  W_{K} \in \mathbb{R}^{d \times d_{K}}, W_{V} \in \mathbb{R}^{d \times d_{V}}$, where $d_{Q}, d_{K}, d_{V} \in \mathbb{R} \text{ s.t. } d_{Q} = d_{K}$ are the amount of columns in their respective weight matrices, $$Q = XW_{Q}, K = XW_{K}, V = XW_{V}$$
 Which means that $Q \in \mathbb{R}^{d \times d_{Q}}, K \in \mathbb{R}^{d \times d_{K}}, V \in \mathbb{R}^{d \times d_{V}}$.
 
-Ok, so that might seem like gibberish, but let's decipher what is being said in the math.  
+Ok, so that might seem like gibberish, but let's decipher what is being said in the math.
+
+The key in understanding what $W_{Q}, W_{K}, W_{V}$ are.  These are weights (magic numbers that make everything work) that the algorithm learns through traning.  
+
+Setting up the weights, one needs to make sure that their inialized matrices have $d$ amount of rows (which was the amount of columns that $X$ has) for legal matrix multiplication.  The number of columns of $W_{Q}$ and $W_{K}$ must be the same, but otherwise, the amount of columns of the weight matrices are a hyperparameter that the user might have to play with.
 
 
 
