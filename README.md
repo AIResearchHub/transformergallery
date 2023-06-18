@@ -35,7 +35,7 @@ We'd also call this query/key vector a "one-hot matrix".  Intuitively, we can th
 
 Now consider a similarity score between queries and keys that is not binary but in a range of \[0,1\] rather than an element of {0,1} (note that in pratice, we can have our similarity scores live in any range).
 
-Based on our formula, the more similar the query is to a key - i.e., the closer $\textrm{similarity}(q, k_{i})$ is to 1 - the more the key's associated value will consribute to attention.  Inversely, if $\textrm{similarity}(q, k_{i})v_{i}$ is small, the attention won't be as impacted by $v_{i}$. 
+Based on our formula, the more similar the query is to a key - i.e., the closer $\textrm{similarity}(q, k_{i})$ is to 1 - the more the key's associated value will consribute to attention.  Inversely, if $\textrm{similarity}(q, k_{i})$ is small, the attention won't be as impacted by $v_{i}$. 
 
 As an example to build intuition, assume we have a dataset of engeineering major's projecting starting salaries (value) given their GPA (key) (for the sake of the exercise, let's assume that there is some kind of correlation between GPA and starting salary).  
 
