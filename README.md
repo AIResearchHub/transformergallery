@@ -87,7 +87,7 @@ Generalizing a bit, let's say that we have n number of words in our input senten
 Next, we need to get our keys, queries, and values matrices.  First, we'll go over the math, then deconstruct why the math makes sense.
 
 For in input $X \in \mathbb{R}^{n \times d}$ and trained weights $W_{Q} \in \mathbb{R}^{d \times d_{Q}},  W_{K} \in \mathbb{R}^{d \times d_{K}}, W_{V} \in \mathbb{R}^{d \times d_{V}}$, where $d_{Q}, d_{K}, d_{V} \in \mathbb{R} \text{ s.t. } d_{Q} = d_{K}$ are the amount of columns in their respective weight matrices, $$Q = XW_{Q}, K = XW_{K}, V = XW_{V}$$
-Which means that $Q \in \mathbb{R}^{d \times d_{Q}}, K \in \mathbb{R}^{d \times d_{K}}, V \in \mathbb{R}^{d \times d_{V}}$.
+Which means that $Q \in \mathbb{R}^{n \times d_{Q}}, K \in \mathbb{R}^{n \times d_{K}}, V \in \mathbb{R}^{n \times d_{V}}$.
 
 Ok, so that might seem like gibberish, but let's decipher what is being said in the math.
 
@@ -99,7 +99,7 @@ Notice how $Q$, $K$, and $V$ all have n rows (remember that n was the number of 
 
 But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$, our self attention is: $$S = f(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_{Q}}})V$$
 
-Notice the similar structure to the 
+Let's start with $QK^T$.  Recall how each row of Q and K encodes certain information about one of the words in the sentence?  When we take the transpose of $K$, $K^T$, we are making it so that every column of $K^T$ now contains that information about the word rather than the row.  This rearrangement sets us up nicely for matrix multiplication with Q, since, by performing $QK^T$, we will be taking the dot product of K's information about a word with Q's information about the same word.  Therefore, the result of $QK^T$ will be a $n \times n$ matrix with information about Q and K.
 
 
 ### Sources:
