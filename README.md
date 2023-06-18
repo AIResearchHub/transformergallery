@@ -95,7 +95,9 @@ The key in understanding what $W_{Q}, W_{K}, W_{V}$ are.  These are weights (mag
 
 Setting up the weights, we need to make sure that their inialized matrices have $d$ amount of rows (which was the amount of columns that $X$ has) for legal matrix multiplication.  The number of columns of $W_{Q}$ and $W_{K}$ must be the same, but otherwise, the amount of columns of the weight matrices are a hyperparameter that the user might have to play with.
 
-Notice how $Q$, $K$, and $V$ all have 
+Notice how $Q$, $K$, and $V$ all have n rows (remember that n was the number of words in the sentence).  We can therefore interpret our trio of metrices as having a query, key or value vector for each word in the senence that, though the magic of training, when put through a certain formula, result in the appropriate amount of attention.
+
+But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$, our self attention is: $$S = f(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_{Q}}})V$$
 
 
 
