@@ -42,7 +42,11 @@ As an example to build intuition, assume we have a dataset of engeineering major
 A fourth-year engineering student with a 3.5 (query) might look through the database and focus only on the GPAs in the range of 3.4-3.6 (similar keys), and would expect to receive a starting salary in that range (weighting values more heavily based on query/key similarity) cetrus paribus.  
 They might pay some attention to those with a 3.0 or 4.0 GPA (dissimilar keys) and the starting salaries of those students, but our 3.5 GPA student wouldn't really expect a 3.0 or 4.0 GPA student's salary (weighting values lighly based on query/key correlation), though it still remains a possibility.
 
-To put this example to practice, we'd have to concoct some kind of $\textrm{similarity}(q, k_{i})$ function that 
+This example begs the question: "What exactly is $\textrm{similarity}(q, k_{i})$"?  How will we knoe that it works for the example.  The answer is somewhat unsatisfying: we have to decide what $\textrm{similarity}(q, k_{i})$ is.
+
+Our similarity function can take many forms depending on the task at hand; the burden falls on the practitioner to select the most apporpriate for the task.  Here are some common weighting mechanisms:
+
+** INSERT CHART OR SOMETHING**
 
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
