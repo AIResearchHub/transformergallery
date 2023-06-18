@@ -35,7 +35,8 @@ class Longformer(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1
+                 p=0.1,
+                 **kwargs
                  ):
         super(Longformer, self).__init__()
         self.max_len = max_len
@@ -90,14 +91,14 @@ class LongformerHuggingface(nn.Module):
 
         self.model = LongformerModel.from_pretrained(pretrained)
 
+    def reset(self):
+        pass
+
     def init_state(self, batch_size=1, device="cpu"):
         return torch.zeros(1, batch_size, 1, 1, device=device)
 
-    def state_forward(self, ids, state):
-        return state
-
-    def forward(self, ids, state):
+    def forward(self, ids):
         output = self.model(ids)
 
-        return output.last_hidden_state, state
+        return output.last_hidden_state
 

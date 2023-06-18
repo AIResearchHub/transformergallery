@@ -79,35 +79,38 @@ class KNNMemory:
         self.device = device
 
         self.n_jobs = cpu_count() if multiprocessing else 1
+        print("Number of jobs: ", self.n_jobs)
 
     def reset(self):
         for i in range(self.bsz):
             self.indices[i].reset()
 
-    def add(self, queries):
+    def add(self, kv):
+        kv = kv.cpu().detach().numpy()
 
         # @delayed
         # def knn_add(knn, x):
         #     knn.add(x)
         #     return knn
-
-        # updated_knns = Parallel(n_jobs = self.n_jobs)(knn_add(*args) for args in zip(self.indices, queries))
+        #
+        # updated_knns = Parallel(n_jobs=self.n_jobs)(knn_add(*args) for args in zip(self.indices, kv))
         # for i in range(self.bsz):
         #     self.indices[i] = updated_knns[i]
 
         for i in range(self.bsz):
-            self.indices[i].add(queries[i])
+            self.indices[i].add(kv[i])
 
     def search(self, queries, topk):
+        queries = queries.cpu().detach().numpy()
 
         # @delayed
         # def knn_search(knn, query):
         #     score, value, vector = knn.search_and_reconstruct(query, topk)
         #     return torch.from_numpy(vector)
-
+        #
         # vectors = Parallel(n_jobs=self.n_jobs)(knn_search(*args) for args in zip(self.indices, queries))
         # vectors = torch.stack(vectors).to(self.device)
-
+        #
         # return vectors
 
         vectors, masks = [], []
@@ -158,17 +161,15 @@ class KNN:
         self.is_trained = True
 
     def add(self, x):
-        x = x.cpu().detach()
-
-        if not self.is_trained:
-            self.train(x)
+        # if not self.is_trained:
+        #     self.train(x)
 
         self.index.add(x)
 
     def search_and_reconstruct(self, queries, k):
         """how do u even perform more than topk=1? how does that even work?"""
         seqlen, dim = queries.shape
-        scores, values, vectors = self.index.search_and_reconstruct(queries.cpu().detach(), k)
+        scores, values, vectors = self.index.search_and_reconstruct(queries, k)
         vectors = vectors.reshape(seqlen, dim)
 
         return scores, values, vectors

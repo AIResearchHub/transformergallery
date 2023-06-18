@@ -7,14 +7,14 @@ from trainer import Trainer
 from dataset import PG19Dataset
 
 
-def main(seq_len=4096,
+def main(seq_len=512,
          vocab_size=30522,
          n_layers=4,
          d_model=768,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=1,
+         batch_size=32,
          n_accumulate=1,
          burnin=0,
          rollout=1,
@@ -35,7 +35,7 @@ def main(seq_len=4096,
     )
 
     lm = TransformerLM(
-        cls=LongformerHuggingface,
+        cls=Unlimiformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,

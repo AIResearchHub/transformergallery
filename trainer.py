@@ -64,6 +64,9 @@ class Trainer:
     def run_epoch(self, epoch):
 
         for i, batch in enumerate(self.dataloader):
+            if batch.size(0) != self.batch_size:
+                continue
+
             # batch (bsz, block_len, seq_len)
             loss = self.step(batch)
 
@@ -76,7 +79,7 @@ class Trainer:
                 print(f"Epoch: {epoch} \t "
                       f"Time: {time.time() - self.start} \t "
                       f"Loss: {loss} \t "
-                      f"Update/Sec: {(time.time() - self.start) / self.updates}")
+                      f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
             if i % 10000 == 0:
                 torch.save(self.model, "saved/final")
