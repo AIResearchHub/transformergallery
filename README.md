@@ -14,7 +14,7 @@ We will use the following notation to refer to queries, keys, and values:
 
 Database
 
-$\textbf{D} = \textrm{ \{ }(k_{1}, v_{1}), (k_{2}, v_{2}), ... , (k_{i}, v_{i}), ..., (k_{n-1}, v_{n-1}), (k_{n}, v_{n})\}\textrm{ \} } $ 
+$\textbf{D} = \lbrace(k_{1}, v_{1}), (k_{2}, v_{2}), ... , (k_{i}, v_{i}), ..., (k_{n-1}, v_{n-1}), (k_{n}, v_{n})\rbrace$ 
 
 where each tuple $(k_{i}, v_{i})$ refers to a key, $k_{i}$, and its associated value, $v_{i}$.
 A query will be denoted by $q$.
