@@ -33,10 +33,17 @@ When searching a database, we often look for absolute matches, meaning the query
 
 We'd also call this query/key vector a "one-hot matrix".  Intuitively, we can think of this version of query/key relationship as just a true/false one.
 
-Now consider a similarity score between queries and keys that is not binary but in a range of \[0,1\]
+Now consider a similarity score between queries and keys that is not binary but in a range of \[0,1\] rather than an element of {0,1}.
+
+Based on our formula, the more similar the query is to a key - i.e., the closer $\textrm{ similarity}(q, k_{i})v_{i}$ is to 1 - the more the key's associated value will consribute to attention.  Inversely, if $\textrm{ similarity}(q, k_{i})v_{i}$ is small, the attention won't be as impacted by $v_{i}$. 
+
+As an example to build intuition, assume we have a dataset of engeineering major's projecting starting salaries (value) given their GPA (key) \[for the sake of the exercise, let's assume that there is some kind of correlation between GPA and starting salary\].  
+
+A fourth-year engineering student with a 3.5 (query) might look through the database and focus only on the GPAs in the range of 3.4-3.6 (similar keys), and would expect to receive a starting salary in that range (weighting values more heavily based on query/key similarity) cetrus paribus.  
+They might pay some attention to those with a 3.0 or 4.0 GPA (dissimilar keys) and the starting salaries of those students, but our 3.5 GPA student wouldn't really expect a 3.0 or 4.0 GPA student's salary (weighting values lighly based on query/key correlation), though it still remains a possibility.
 
 
-Sources:
+### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
 https://www.mongodb.com/databases/key-value-database
 https://www.educative.io/blog/what-is-database-query-sql-nosql
