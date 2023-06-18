@@ -101,7 +101,7 @@ But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$
 
 Let's start with $QK^T$.  Recall how each row of $Q$ and $K$ encodes certain information about one of the words in the sentence?  When we take the transpose of $K$, $K^T$, we are making it so that every column of $K^T$ now contains that information about the word rather than the row.  This rearrangement sets us up nicely for matrix multiplication with $Q$, since, by performing $QK^T$, we will be taking the dot product of $K$'s information about a word with $Q$'s information about another (or the same) word.  We will end up with a matrix that has a row for each word detailing other words' realive importance to it, much like in out dog example above REFERENCE IT.
 
-Next, we'll think about what $\frac{1}{\sqrt{d_{Q}}}$ is and it's purpose.  Though $\frac{1}{\sqrt{d_{Q}}}$ is intimidating, it is just a scalar for $QK^T$.  Remember that $d_{Q}$ is the amount of columns in $W_{Q}$, and therefore also the number of columns in $Q$.  Also recall that $W_{Q} = W_{K}$, which not only makes the matrix multiplication of $QK^T$ possible, but 
+Next, we'll think about what $\frac{1}{\sqrt{d_{Q}}}$ is and it's purpose.  Though $\frac{1}{\sqrt{d_{Q}}}$ is intimidating, it is just a scalar for $QK^T$.  Remember that $d_{Q}$ is the amount of columns in $W_{Q}$, and therefore also the number of columns in $Q$.  Also recall that $d_{Q} = d_{K}$, which not only makes the matrix multiplication of $QK^T$ possible, but means that we could use $d_{K}$ if we so desired.
 
 
 ### Sources:
