@@ -104,6 +104,8 @@ Let's start with $QK^T$.  Recall how each row of $Q$ and $K$ encodes certain inf
 Next, we'll think about what $\frac{1}{\sqrt{d_{Q}}}$ is and it's purpose.  Though $\frac{1}{\sqrt{d_{Q}}}$ is intimidating, it is just a scalar for $QK^T$.  Remember that $d_{Q}$ is the amount of columns in $W_{Q}$, and therefore also the number of columns in $Q$.  Also recall that $d_{Q} = d_{K}$, which not only makes the matrix multiplication of $QK^T$ possible, but means that we could use $d_{K}$ if we so desired. $\frac{1}{\sqrt{d_{Q}}}$ helps keep the values of $QK^T$ from exploding, and also helps with gradient descent in backpropogation.
 
 
+Softmax is defined as follows: for vector $z \in \mathbb{R}^K$ with elements $z_{i}, \all i \in \mathbb{Z}^{+} \leq K$  $$\text{softmax}(z)_{i} = \frac{\exp{z_{i}}}{\sigma_{j = 1}^{K} \exp{z_{j}}}$$
+
 
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
@@ -112,5 +114,6 @@ https://www.educative.io/blog/what-is-database-query-sql-nosql
 https://www.youtube.com/watch?v=OyFJWRnt_AY&ab_channel=PascalPoupart
 https://www.youtube.com/watch?v=i_pfHD4P_wg&ab_channel=SebastianRaschka
 https://theaisummer.com/self-attention/
+https://en.wikipedia.org/wiki/Softmax_function
 
 
