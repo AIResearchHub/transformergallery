@@ -21,7 +21,7 @@ There are much more to queries, keys, and values, but, for the purposes of under
 
 The general formula for attention is as follows:
 
-$$ Attention(q, \textbf{D}) = \Sigma_{i}similarity(q, k_{i})v_{i} $$ where \textbf{D} := \{ (k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n}), and $q$ is a query.
+$$Attention(q, \textbf{D}) = \Sigma_{i}similarity(q, k_{i})v_{i}$$ where \textbf{D} := \{ (k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n}), and $q$ is a query.
 
 In mathmatical terms, attention is a linear combination of the similarity of queries and keys multiplied by the key's associated value for all 
 
