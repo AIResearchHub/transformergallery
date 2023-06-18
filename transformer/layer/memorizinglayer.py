@@ -7,10 +7,10 @@ from ..attention import KNNAttention
 from .feedforward import FeedForward
 
 
-class UnlimiLayer(nn.Module):
+class MemorizingLayer(nn.Module):
 
     def __init__(self, d_model, ffn_hidden, n_head, p, bsz, device):
-        super(UnlimiLayer, self).__init__()
+        super(MemorizingLayer, self).__init__()
         self.attention = Attention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
@@ -31,15 +31,6 @@ class UnlimiLayer(nn.Module):
 
     def forward(self, x, src_mask=None):
         """Compute the output of the transformer layer"""
-
-        # compute self attention
-        _x = x
-        x = self.attention(q=x, kv=x, mask=src_mask)
-
-        x = self.norm1(x + _x)
-        x = self.dropout1(x)
-
-        # compute cross attention with queried k and v
         _x = x
         x = self.knn_attention(q=x, kv=x, mask=src_mask)
 

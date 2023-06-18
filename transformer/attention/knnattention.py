@@ -57,17 +57,16 @@ class KNNAttention(nn.Module):
 
         # get cached keys and values from memory
         mem = self.memory.search(q, topk=topk)
-        k, v = mem.unbind(2, dim=-2)
-        k, v = k.unsqueeze(1), v.unsqueeze(1)
+        k, v = mem.unbind(dim=-2)
 
         # perform external memory attention
         retrieved_attn = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
 
         # is the sigmoid needed?
-        # gate = F.sigmoid(self.bias)
-        # out = retrieved_attn * gate + local_attn * (1 - gate)
+        gate = F.sigmoid(self.bias)
+        out = retrieved_attn * gate + local_attn * (1 - gate)
 
-        out = local_attn + retrieved_attn
+        # out = local_attn + retrieved_attn
 
         out = rearrange(out, 'b h l d -> b l (h d)', h=self.n_head)
         out = self.w_concat(out)
@@ -108,6 +107,9 @@ class KNNMemory:
             self.indices[i].add(kv[i])
 
     def search(self, queries, topk):
+        """TODO: add indices masks"""
+        bsz, nhead, seqlen, dhead = queries.shape
+        queries = queries.reshape(bsz, -1, dhead)
         queries = queries.cpu().detach().numpy()
 
         # @delayed
@@ -122,12 +124,11 @@ class KNNMemory:
 
         vectors, masks = [], []
         for i in range(self.bsz):
-            score, value, vector = self.indices[i].search_and_reconstruct(queries[i], topk)
+            vector = self.indices[i].search(queries[i], topk)
             vectors.append(torch.from_numpy(vector))
-            # masks.append(mask)
 
         vectors = torch.stack(vectors).to(self.device)
-        masks = torch.ones_like(vectors)
+        vectors = vectors.reshape(bsz, nhead, seqlen, 2, dhead)
 
         return vectors  # , masks
 
@@ -151,6 +152,9 @@ class KNN:
         self.dim = dim
         self.keys = []
 
+        self.db = []
+        # self.db = np.zeros(())
+
         # what is the M for?
         # approximate kNN memory
         self.index = faiss.IndexHNSWFlat(dim, M, faiss.METRIC_INNER_PRODUCT)
@@ -161,6 +165,7 @@ class KNN:
         # self.index.add(xb)
 
     def reset(self):
+        self.db = []
         self.index.reset()
         self.is_trained = False
 
@@ -173,11 +178,20 @@ class KNN:
         #     self.train(x)
         keys = np.ascontiguousarray(x[..., 0, :])
 
+        # add to memory
+        for _x in x:
+            self.db.append(_x)
+
         self.index.add(keys)
+
+    def search(self, queries, k):
+        distance, indices = self.index.search(queries, k)
+
+        vectors = np.array([self.db[i[0]] for i in indices])
+        return vectors
 
     def search_and_reconstruct(self, queries, k):
         """how do u even perform more than topk=1? how does that even work?"""
-        print(queries.shape)
         seqlen, dim = queries.shape
         scores, values, vectors = self.index.search_and_reconstruct(queries, k)
         vectors = vectors.reshape(seqlen, dim)

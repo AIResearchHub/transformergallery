@@ -6,6 +6,6 @@ from .transformer import Transformer, TransformerHuggingface
 from .transformerxl import TransformerXL
 from .longformer import Longformer, LongformerHuggingface
 from .longformerxl import LongformerXL
-from .unlimiformer import Unlimiformer
+from .memorizingtransformer import MemorizingTransformer
 from .blockrecurrenttransformer import BlockRecurrentTransformer
 
