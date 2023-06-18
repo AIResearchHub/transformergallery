@@ -99,7 +99,7 @@ Notice how $Q$, $K$, and $V$ all have n rows (remember that n was the number of 
 
 But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$, our self attention is: $$S = f(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_{Q}}})V$$
 
-
+Notice the similar structure to the 
 
 
 ### Sources:
