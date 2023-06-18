@@ -12,7 +12,7 @@ Sticking with the example of student name as the key and their major as the valu
 
 We will use the following notation to refer to queries, keys, and values:
 
-Database $\textbf{D} = \{ (k_{1}, v_{1}), (k_{2}, v_{2}), ... , (k_{i}, v_{i}), ..., (k_{n-1}, v_{n-1}), (k_{n}, v_{n})\}$ where each tuple $(k_{i}, v_{i})$ refers to a key, $k_{i}$, and its associated value, $v_{i}$.
+Database $\textbf{D}$ = {$(k_{1}, v_{1}), (k_{2}, v_{2}), ... , (k_{i}, v_{i}), ..., (k_{n-1}, v_{n-1}), (k_{n}, v_{n})$} where each tuple $(k_{i}, v_{i})$ refers to a key, $k_{i}$, and its associated value, $v_{i}$.
 A query will be denoted by $q$.
 
 There are much more to queries, keys, and values, but, for the purposes of understanding attention, the information above suffices.  If you are intrested in databases beyond the bounds of attention, or simply want more information, we have provided some resources !!!WHERE!!!.
@@ -21,7 +21,7 @@ There are much more to queries, keys, and values, but, for the purposes of under
 
 The general formula for attention is as follows:
 
-$$\textrm{Attention}(q, \textbf{D}) = \Sigma_{i}\textrm{ similarity}(q, k_{i})v_{i}$$ where $\textbf{D}$ := $ \{ (k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n}) \} $, and $q$ is a query.
+$$\textrm{Attention}(q, \textbf{D}) = \Sigma_{i}\textrm{ similarity}(q, k_{i})v_{i}$$ where $\textbf{D}$ := {$(k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n})$}, and $q$ is a query.
 
 In mathmatical terms, attention is a linear combination of the similarity of queries and keys multiplied by the key's associated value for all 
 
