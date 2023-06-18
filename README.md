@@ -84,6 +84,10 @@ Machines speak numbers, so we need to take our words and put them into vector fo
 
 Generalizing a bit, let's say that we have n number of words in our input sentence, and our word to vector algorithm returns a vector of d dimentions for each word.  After vectorizing, then, we'd have a matrix $X \in \mathbb{R}^{n \times d}$ that represents the input in numerical form where each row of $X$ is a word of the input.
 
+Next, we need to get our keys, queries, and values matrices.  First, we'll go over the math, then deconstruct why the math makes sense.
+
+For in input $X \in \mathbb{R}^{n \times d}$ and trained weights $W_{Q} \in \mathbb{R}^{d \times d_{Q}},  W_{K} \in \mathbb{R}^{d \times d_{K}}, W_{V} \in \mathbb{R}^{d \times d_{V}}$, where $d_{Q}, d_{K}, d_{V}$ are 
+
 
 
 
