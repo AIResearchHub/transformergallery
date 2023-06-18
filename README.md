@@ -48,9 +48,19 @@ Our similarity function can take many forms depending on the task at hand; the b
 
 ** INSERT CHART OR SOMETHING**
 
+## Self Attention
+
+Let's start to get into some real natural language processing (NLP) with the hopes of building towards transformer architecture.  Self attention is our first big building block to doing so.
+
+
+
+
+
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
 https://www.mongodb.com/databases/key-value-database
 https://www.educative.io/blog/what-is-database-query-sql-nosql
 https://www.youtube.com/watch?v=OyFJWRnt_AY&ab_channel=PascalPoupart
+https://www.youtube.com/watch?v=i_pfHD4P_wg&ab_channel=SebastianRaschka
+
 
