@@ -93,7 +93,9 @@ Ok, so that might seem like gibberish, but let's decipher what is being said in 
 
 The key in understanding what $W_{Q}, W_{K}, W_{V}$ are.  These are weights (magic numbers that make everything work) that the algorithm learns through traning.  
 
-Setting up the weights, one needs to make sure that their inialized matrices have $d$ amount of rows (which was the amount of columns that $X$ has) for legal matrix multiplication.  The number of columns of $W_{Q}$ and $W_{K}$ must be the same, but otherwise, the amount of columns of the weight matrices are a hyperparameter that the user might have to play with.
+Setting up the weights, we need to make sure that their inialized matrices have $d$ amount of rows (which was the amount of columns that $X$ has) for legal matrix multiplication.  The number of columns of $W_{Q}$ and $W_{K}$ must be the same, but otherwise, the amount of columns of the weight matrices are a hyperparameter that the user might have to play with.
+
+Notice how $Q$, $K$, and $V$ all have 
 
 
 
