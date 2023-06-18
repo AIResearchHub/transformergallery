@@ -97,7 +97,7 @@ Setting up the weights, we need to make sure that their inialized matrices have 
 
 Notice how $Q$, $K$, and $V$ all have n rows (remember that n was the number of words in the sentence).  We can therefore interpret our trio of metrices as having a query, key or value vector for each word in the senence that, though the magic of training, when put through a certain formula, result in the appropriate amount of attention.
 
-But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$, our self attention is: $$S = f(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_{Q}}})V$$
+But what is this "certain formula"?  Using the already defined $Q$, $K$, and $V$, our self attention is: $$S = f(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d_{Q}}})V$$
 
 Let's start with $QK^T$.  Recall how each row of $Q$ and $K$ encodes certain information about one of the words in the sentence?  When we take the transpose of $K$, $K^T$, we are making it so that every column of $K^T$ now contains that information about the word rather than the row.  This rearrangement sets us up nicely for matrix multiplication with $Q$, since, by performing $QK^T$, we will be taking the dot product of $K$'s information about a word with $Q$'s information about another (or the same) word.  We will end up with a matrix that has a row for each word detailing other words' realive importance to it, much like in out dog example above REFERENCE IT.
 
