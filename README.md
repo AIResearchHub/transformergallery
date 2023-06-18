@@ -23,6 +23,8 @@ The general formula for attention is as follows:
 
 $$ Attention(q, \textbf{D}) = \Sigma_{i}similarity(q, k_{i})v_{i} $$ where \textbf{D} := \{ (k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n}), and $q$ is a query.
 
+In mathmatical terms, attention is a linear combination of the similarity of queries and keys multiplied by the key's associated value for all 
+
 First, let's compare our new attention formula to searching a database using queries, keys, and values.  
 
 When searching a database, we often look for absolute matches, meaning the query and key are identical (similarity = 1).  If we have one student named "John Doe" in our registrar, when we query our database for "John Doe", we expect the similarity of the query and keys to be 0 everywhere except when the key is "John Doe".  Therefore, we'd have a image:
@@ -31,7 +33,7 @@ When searching a database, we often look for absolute matches, meaning the query
 
 We'd also call this query/key vector a "one-hot matrix".  Intuitively, we can think of this version of query/key relationship as just a true/false one.
 
-In fact, the above example is a special version of attention
+Now consider a similarity score between queries and keys that is not binary but in a range of \[0,1\]
 
 
 Sources:
