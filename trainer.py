@@ -4,63 +4,116 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 
+import time
+
+from optim_schedule import ScheduledOptim
+
+
+def apply_mlm_mask(batch, mask_prob):
+    device = batch.device
+
+    probs = torch.rand(*batch.shape)
+    masks = (probs < mask_prob).to(device)
+
+    # create inputs
+    inputs = batch.detach() * torch.logical_not(masks).to(device)
+    inputs[inputs == 0] = 103
+
+    # create labels
+    labels = batch.detach() * masks
+
+    return inputs.long(), labels.long()
+
 
 class Trainer:
 
     def __init__(self,
                  model,
-                 memory,
+                 dataloader,
                  lr,
                  batch_size,
                  n_accumulate,
+                 seqlen,
                  burnin,
                  rollout,
+                 warmup_steps,
+                 device,
                  ):
 
-        self.model = nn.DataParallel(model).cuda()
+        self.model = nn.DataParallel(model)
+        if device == "cuda":
+            self.model = self.model.cuda()
         self.opt = Adam(self.model.parameters(), lr=lr)
+        self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)
+
         self.criterion = nn.NLLLoss(ignore_index=0)
 
-        self.memory = memory
+        self.dataloader = dataloader
         self.batch_size = batch_size
         self.n_accumulate = n_accumulate
 
+        self.seqlen = seqlen
         self.burnin = burnin
         self.rollout = rollout
         self.length = burnin + rollout
 
-    def step(self):
-        """TODO: accumulating gradients"""
+        self.log = open(f"logs/lm", "w")
+        self.start = time.time()
+        self.updates = 0
 
-        X, Y, states, idxs = self.memory.get_batch(batch_size=self.batch_size)
+    def run_epoch(self, epoch):
 
-        loss, next_states = self.get_grad(X, Y, states)
-        self.opt.step()
+        for i, batch in enumerate(self.dataloader):
+            if batch.size(0) != self.batch_size:
+                continue
 
-        self.memory.update_state(idxs=idxs, t=1, states=next_states)
+            # batch (bsz, block_len, seq_len)
+            loss = self.step(batch)
 
-        return loss
+            self.log.write(f"{time.time() - self.start}, {loss}\n")
+            self.log.flush()
 
-    def get_grad(self, X, Y, state):
-        X = X[0]
-        Y = Y[0]
+            self.updates += 1
 
-        self.model.zero_grad()
+            if i % 5 == 0:
+                print(f"Epoch: {epoch} \t "
+                      f"Time: {time.time() - self.start} \t "
+                      f"Loss: {loss} \t "
+                      f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
-        expected, next_state = self.model(X, state)
-        loss = self.bert_loss(Y, expected)
-        loss.backward()
+            if i % 10000 == 0:
+                torch.save(self.model, "saved/final")
 
-        return loss.item(), next_state.detach()
+    def step(self, batch):
+        total_loss = 0
+        inputs, targets = apply_mlm_mask(batch, mask_prob=0.25)
 
-    def bert_loss(self, target, expected):
+        self.model.module.reset()
+        for t in range(self.rollout):
+            expected = self.model(inputs[:, t, :])
+            loss = self.bert_loss(expected, targets[:, t, :])
+            self.opt.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
+            self.opt.step()
+
+            total_loss += loss.item()
+
+        return total_loss / (self.rollout * self.seqlen)
+
+    def bert_loss(self, expected, target):
         """
-        :param target:   [batch_size, max_len]
-        :param expected: [batch_size, max_len, vocab_size]
+        negative log likelihood takes in log probabilities and labels
+        and outputs loss
+
+        Parameters:
+            expected (batch_size, max_len, vocab_size)
+            target (batch_size, max_len)
         """
-        assert target.shape == (self.batch_size, target.size(1))
-        assert expected.shape == (self.batch_size, target.size(1), expected.size(2))
+        assert target.shape == (target.size(0), target.size(1))
+        assert expected.shape == (target.size(0), target.size(1), expected.size(2))
 
         expected = expected.transpose(1, 2)
 
-        return self.criterion(expected, target)
+        loss = self.criterion(expected, target)
+        return loss.mean()

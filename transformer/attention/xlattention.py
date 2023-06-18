@@ -44,9 +44,11 @@ class XLAttention(nn.Module):
         q, k, v = self.w_q(q), *self.w_kv(c).chunk(2, dim=-1)
         q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
+        q /= math.sqrt(self.d_head)
+
         # q  [batch_size, n_head, length, d_head]
         # k  [batch_size, n_head, length+mem_length, d_head]
-        attn_score = torch.einsum('bhid,bojd->bhij', (q, k)) / math.sqrt(self.d_head)
+        attn_score = torch.einsum('bhid,bojd->bhij', (q, k))
 
         if mask is not None:
             attn_score = attn_score.masked_fill(mask == 0, -10000)

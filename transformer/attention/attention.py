@@ -29,7 +29,7 @@ class Attention(nn.Module):
         q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
         q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
-        out, attention = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+        out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
 
         out = self.concat(out)
         out = self.w_concat(out)

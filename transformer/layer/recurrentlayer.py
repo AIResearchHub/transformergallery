@@ -2,15 +2,15 @@
 
 import torch.nn as nn
 
-from ..attention import XLAttention
+from ..attention import RecurrentAttention
 from .feedforward import FeedForward
 
 
-class XLAttentionLayer(nn.Module):
+class RecurrentLayer(nn.Module):
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
-        super(XLAttentionLayer, self).__init__()
-        self.attention = XLAttention(d_model=d_model, n_head=n_head)
+        super(RecurrentLayer, self).__init__()
+        self.attention = RecurrentAttention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
 
@@ -18,10 +18,10 @@ class XLAttentionLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=p)
 
-    def forward(self, x, mem, src_mask=None):
+    def forward(self, x, state, src_mask=None):
         """Compute the output of the transformer layer"""
         _x = x
-        x = self.attention(q=x, kv=x, mem=mem, mask=src_mask)
+        x, state = self.attention(qx=x, kvx=x, qs=state, kvs=state, mask=src_mask)
 
         x = self.norm1(x + _x)
         x = self.dropout1(x)
@@ -32,5 +32,4 @@ class XLAttentionLayer(nn.Module):
         x = self.norm2(x + _x)
         x = self.dropout2(x)
 
-        return x
-
+        return x, state

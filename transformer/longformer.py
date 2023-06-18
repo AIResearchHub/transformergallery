@@ -4,12 +4,20 @@ import torch
 import torch.nn as nn
 
 from .layer import TransformerEmbedding, LongformerLayer
+from transformers import LongformerModel
 
 
 class Longformer(nn.Module):
     """
     A standard Longformer module that outputs the unprocessed
     output of the last transformer layer
+
+    Benchmarks:
+    Transfomer seqlen 4096 = 6090MB
+    Transformer seqlen 8192 = 19202MB
+
+    Longformer seqlen 4096 = 5474MB
+    Longformer seqlen 8192 = 9550MB
 
     Parameters:
     vocab_size (int): Vocabulary size
@@ -27,27 +35,34 @@ class Longformer(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1
+                 p=0.1,
+                 **kwargs
                  ):
         super(Longformer, self).__init__()
         self.max_len = max_len
         self.n_layers = n_layers
         self.d_model = d_model
 
-        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.embedding = TransformerEmbedding(vocab_size=vocab_size,
+                                              d_model=d_model,
+                                              max_len=max_len)
+
         self.layers = nn.ModuleList(
             [LongformerLayer(d_model=d_model, ffn_hidden=4 * d_model, n_head=n_head, p=p)
              for _ in range(n_layers)])
 
+        self.reset()
 
-    def init_state(self, batch_size=1, device="cpu"):
-        return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=device)
+    def reset(self):
+        self.state = None
 
-    def state_forward(self, ids, state):
-        """Returns next recurrent state, since standard transformer just return original state"""
-        return state
+    def set_state(self, state):
+        self.state = state
 
-    def forward(self, ids, state):
+    def get_state(self):
+        return self.state
+
+    def forward(self, ids):
         """
         Computes transformer output
 
@@ -66,4 +81,24 @@ class Longformer(nn.Module):
             x = layer(x)
             # print(x.shape)
 
-        return x, state
+        return x
+
+
+class LongformerHuggingface(nn.Module):
+
+    def __init__(self, pretrained="allenai/longformer-base-4096", **kwargs):
+        super(LongformerHuggingface, self).__init__()
+
+        self.model = LongformerModel.from_pretrained(pretrained)
+
+    def reset(self):
+        pass
+
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(1, batch_size, 1, 1, device=device)
+
+    def forward(self, ids):
+        output = self.model(ids)
+
+        return output.last_hidden_state
+

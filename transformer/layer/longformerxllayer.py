@@ -1,16 +1,27 @@
 
 
+import torch
 import torch.nn as nn
 
-from ..attention import XLAttention
+from ..attention import LocalXLAttention
 from .feedforward import FeedForward
 
 
-class XLAttentionLayer(nn.Module):
+class LongformerXLLayer(nn.Module):
+    """
+    Class representing a standard transformer layer. This layer includes self-attention,
+    normalization, dropout, and a feed-forward network
+
+    Parameters:
+    d_model (int): The dimension of the model
+    ffn_hidden (int): The size of the hidden layer in the feed forward network
+    n_head (int): The number of attention heads
+    p (float): The probability of dropout
+    """
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
-        super(XLAttentionLayer, self).__init__()
-        self.attention = XLAttention(d_model=d_model, n_head=n_head)
+        super(LongformerXLLayer, self).__init__()
+        self.attention = LocalXLAttention(d_model=d_model, n_head=n_head)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=p)
 

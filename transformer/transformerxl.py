@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 
 from .layer import TransformerEmbedding, XLAttentionLayer
+from transformers import TransfoXLModel
 
 
 class TransformerXL(nn.Module):
@@ -47,14 +48,18 @@ class TransformerXL(nn.Module):
                                                       p=p)
                                     for _ in range(n_layers)])
 
-    def init_state(self, batch_size=1):
-        return torch.zeros(self.n_layers, batch_size, self.max_len, self.d_model, device=self.device)
+        self.reset()
 
-    def state_forward(self, state):
-        """Returns next recurrent state, since standard transformer just return original state"""
-        return state
+    def reset(self):
+        self.state = None
 
-    def forward(self, ids, state):
+    def set_state(self, state):
+        self.state = state
+
+    def get_state(self):
+        return self.state
+
+    def forward(self, ids):
         """
         Computes transformer xl output
         Layer takes in (length, batch_size, d_model) so transpose before and after layers
@@ -68,13 +73,38 @@ class TransformerXL(nn.Module):
         state (Tensor[batch_size, length, d_model]): next recurrent state
 
         """
+        bsz = ids.size(0)
+
+        if self.state is None:
+            self.state = torch.zeros(self.n_layers, bsz, self.max_len, self.d_model, device=self.device)
+
         x = self.embedding(ids)
 
         next_state = []
-        for layer, s in zip(self.layers, state):
+        for layer, s in zip(self.layers, self.state):
             next_state.append(x.detach())
             x = layer(x, s)
 
-        next_state = torch.stack(next_state)
+        self.state = torch.stack(next_state)
 
-        return x, next_state
+        return x
+
+
+class TransformerXLHuggingface:
+
+    def __init__(self, pretrained="transfo-xl-wt103", **kwargs):
+        super(TransformerXLHuggingface, self).__init__()
+
+        self.model = TransfoXLModel.from_pretrained(pretrained)
+
+    def init_state(self, batch_size=1, device="cpu"):
+        return torch.zeros(1, batch_size, 1, 1, device=device)
+
+    def state_forward(self, ids, state):
+        return state
+
+    def forward(self, ids, state):
+        x = self.model(ids)
+
+        return x, state
+
