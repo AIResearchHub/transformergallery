@@ -82,6 +82,7 @@ What we've just done is map out how important each key (column) is to each query
 
 
 
+
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
 https://www.mongodb.com/databases/key-value-database
