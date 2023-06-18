@@ -50,6 +50,8 @@ Our similarity function can take many forms depending on the task at hand; the b
 
 ## Self Attention
 
+**Intuition**
+
 Self attention is perhaps the most complicated and most integral part of the transformer model.  Before we explore the math and functions behind it, let's cover some intuition.  
 
 If attention is how much we decide to weight certain features, then self attention naturally follows as how much we decide to weight our own features.  Let's start with an example:
@@ -64,9 +66,16 @@ Let's now fit our example into the query, key, value paradigm.  In our sentnece:
 
 "When he saw his owner, the dog was happy, so he wagged his tail"
 
-we treat all the separate words as keys, and, continuing our above exmaple, let's have "happy" as our query
+We treat all the separate words as keys, and, continuing our above exmaple, let's have "happy" as our query.  Each query/key pair will get assigned a value, which is essentially how much attention should be paid to that key for a given query.  That was a lot of consecutive words, so let's illustrate it:
+
+** illistration of happy as query **
+
+In fact, we should have each word take a turn as the query.  If we do so, we end up with the attention matrix:
 
 
+What we've just done is map out how important each key (column) is to each query (row).  In other words, each row is a demonstration of how much attention the word in question pays to its nighbhors (and itself!)
+
+**Math**
 
 
 
