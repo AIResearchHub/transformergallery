@@ -2,6 +2,7 @@
 
 from .utils import apply_mlm_mask
 
+
 def test_memory(model, dataloader):
     """
     Parameters:
@@ -10,5 +11,5 @@ def test_memory(model, dataloader):
     """
 
     for i, batch in enumerate(dataloader):
-
+        pass
 
