@@ -126,7 +126,7 @@ To get self attention on different scales, we employ multiple self attention for
 
 A single self attention mechanism is called a "head", which gives rise to the name "multihead attention" when we utilize multiple heads simulatenously.
 
-Notationally, for the $i$ th head, we denote the $i$ th head's unique query, keys, and values as $W_{Q}^{(i)}, W_{K}^{(i)}, W_{V}^{(i)}$ respectively.  Some people switch the super script and the sub script when writing the $i$ th attention weights, but, for notationaly consistency with the previous explanation of self attention, we will write it as we just presented it.
+Notationally, for the $i \text{th}$ head, we denote the $i \text{th}$ head's unique query, keys, and values as $W_{Q}^{(i)}, W_{K}^{(i)}, W_{V}^{(i)}$ respectively.  Some people switch the super script and the sub script when writing the $i \text{th}$ attention weights, but, for notationaly consistency with the previous explanation of self attention, we will write it as we just presented it.
 
 In a multihead attention layer, the input $X$ gets fed to the multiple heads which use self attention to produce a unique attention score, $S^{(i)}$, based on their own weights.  We then concatenate all the $S^{(i)}$ for $i \leq$ the number of heads.  Lastly, we feed the massive attention matrix through a feed foreward neural network, and, viola, we have just passed through a multihead attention layer.
 
