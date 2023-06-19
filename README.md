@@ -130,6 +130,8 @@ Notationally, for the $i \text{th}$ head, we denote the $i \text{th}$ head's uni
 
 In a multihead attention layer, the input $X$ gets fed to the multiple heads which use self attention to produce a unique attention score, $S^{(i)}$, based on their own weights.  We then concatenate all the $S^{(i)}$ for $i \leq$ the number of heads.  Lastly, we feed the massive attention matrix through a feed foreward neural network, and, viola, we have just passed through a multihead attention layer.
 
+## Summary
+
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
 https://www.mongodb.com/databases/key-value-database
