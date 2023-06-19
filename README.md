@@ -109,6 +109,15 @@ Softmax normalizes the values of $z$ (i.e. $\Sigma_{i}^{K} z_{i}$ = 1), guarente
 
 Notice how softmax is only defined for vectors, but we apply it to $\frac{QK^T}{\sqrt{d_{Q}}}$, a matrix, in our self-attention formula.  When we do softmax($\frac{QK^T}{\sqrt{d_{Q}}}$), we are implying that the softmax function is applied row-wise to the matrix, meaning that we replace each row with a soft-maxed version of itself.
 
+The last missing puzzle piece is $V$, our values matricx, which rounds off the formula in the same way that the values do in the regular attention formula. UNSURE OF THE INTUITION HERE.  Note that while softmax($\frac{QK^T}{\sqrt{d_{Q}}}$) $\in \mathbb{R}^{n \times n}$, multiplying by $V$ leaves the product as an element of $\mathbb{R}^{n \times d_{V}}$, which means that $V$'s dimentions are important since they determine the final attention matrix's shape.
+
+After all that work, we have finally justified the formula for self attention: $$S = f(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d_{Q}}})V$$
+where $S \in \mathbb{R}^{n \times d_{Q}}$.  You might have noticed that earlier in the article, this same formula was listed under "similarity functions" for our basic attention formula.  Though self attention has been incredibly influential, it is only one method of calculating attention; you might find another similarity more suitable for your needs.
+
+## Multiheaded attention
+
+
+
 
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
