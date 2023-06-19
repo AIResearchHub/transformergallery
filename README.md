@@ -114,10 +114,21 @@ The last missing puzzle piece is $V$, our values matricx, which rounds off the f
 After all that work, we have finally justified the formula for self attention: $$S = f(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d_{Q}}})V$$
 where $S \in \mathbb{R}^{n \times d_{Q}}$.  You might have noticed that earlier in the article, this same formula was listed under "similarity functions" for our basic attention formula.  Though self attention has been incredibly influential, it is only one method of calculating attention; you might find another similarity more suitable for your needs.
 
+Often, people will refer to this specific self attention formula as "scaled dot-product attention"
+
 ## Multiheaded attention
 
+Once we've understood self attention, multihead attention follows naturally.
 
+Usually, we are not just dealing with words in a sentence, but words in an entire document, or sentences in a document.  We might like to know the attention relationship between a word and a sentence but simulatneously have the attention relatioshup between the word and the latger paragraph that it belongs to.
 
+To get self attention on different scales, we employ multiple self attention formulas ($S = f(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d_{Q}}})V$) in parallel with different weights and, therefore, different scopes.
+
+A single self attention mechanism is called a "head", which gives rise to the name "multihead attention" when we utilize multiple heads simulatenously.
+
+Notationally, for the $i$th head, we denote the $i$th head's unique query, keys, and values as $W_{Q}^{(i)}, W_{K}^{(i)}, W_{V}^{(i)}$ respectively.  Some people switch the super script and the sub script when writing the $i$th attention weights, but, for notationaly consistency with the previous explanation of self attention, we will write it as we just presented it.
+
+In a multihead attention layer, the input $X$ gets fed to the multiple heads which use self attention to produce a unique attention score, $S^{(i)}$, based on their own weights.  We then concatenate all the $S^{(i)}$ for $i \leq$ the number of heads.  Lastly, we feed the massive attention matrix through a feed foreward neural network, and, viola, we have just passed through a multihead attention layer.
 
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
@@ -127,5 +138,6 @@ https://www.youtube.com/watch?v=OyFJWRnt_AY&ab_channel=PascalPoupart
 https://www.youtube.com/watch?v=i_pfHD4P_wg&ab_channel=SebastianRaschka
 https://theaisummer.com/self-attention/
 https://en.wikipedia.org/wiki/Softmax_function
+https://www.youtube.com/watch?v=A1eUVxscNq8&t=17s&ab_channel=SebastianRaschka
 
 
