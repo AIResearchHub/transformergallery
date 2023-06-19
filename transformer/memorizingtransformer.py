@@ -32,7 +32,7 @@ class MemorizingTransformer(nn.Module):
                                                      ffn_hidden=4 * d_model,
                                                      n_head=n_head,
                                                      p=p)
-                                    for _ in range(n_layers)])
+                                      for _ in range(n_layers // 2)])
 
         self.memorizing_layer = MemorizingLayer(d_model=d_model,
                                                 ffn_hidden=4 * d_model,
@@ -45,7 +45,7 @@ class MemorizingTransformer(nn.Module):
                                                      ffn_hidden=4 * d_model,
                                                      n_head=n_head,
                                                      p=p)
-                                    for _ in range(n_layers)])
+                                      for _ in range(1 - n_layers // 2)])
 
         self.reset()
 
@@ -65,7 +65,7 @@ class MemorizingTransformer(nn.Module):
         for layer in self.layers1:
             x = layer(x)
         x = self.memorizing_layer(x)
-        for layer in self.layers1:
+        for layer in self.layers2:
             x = layer(x)
 
         return x

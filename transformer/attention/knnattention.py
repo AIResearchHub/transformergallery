@@ -29,7 +29,7 @@ class KNNAttention(nn.Module):
 
         self.w_q = nn.Linear(d_model, d_model, bias=False)
         self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
-        self.w_concat = nn.Linear(d_model, d_model, bias=False)
+        self.w_concat = nn.Linear(2 * d_model, d_model, bias=False)
 
         # memorizing transformer gate
         self.bias = nn.Parameter(torch.randn(d_model // n_head), requires_grad=True)
@@ -47,9 +47,9 @@ class KNNAttention(nn.Module):
             kv (bsz, seqlen, dim): hidden states to store in knn memory
         """
         q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
-        k, v = F.normalize(k), F.normalize(v)
+        k, v = F.normalize(k, dim=-1), F.normalize(v, dim=-1)
 
-        self.memory.add(torch.stack((k, v), dim=-2))
+        self.memory.add(torch.stack((k, v), dim=-2).detach())
 
         # perform local attention
         q, k, v = rearrange(q, 'b l (h d) -> b h l d', h=self.n_head), k.unsqueeze(1), v.unsqueeze(1)
@@ -57,16 +57,21 @@ class KNNAttention(nn.Module):
 
         # get cached keys and values from memory
         mem = self.memory.search(q, topk=topk)
-        k, v = mem.unbind(dim=-2)
+        mem_k, mem_v = mem.unbind(dim=-2)
 
         # perform external memory attention
-        retrieved_attn = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+        retrieved_attn = F.scaled_dot_product_attention(q, mem_k, mem_v, attn_mask=mask)
+        # retrieved_attn = retrieved_attn.detach()
 
         # is the sigmoid needed?
-        gate = F.sigmoid(self.bias)
-        out = retrieved_attn * gate + local_attn * (1 - gate)
+        # gate = F.sigmoid(self.bias)
+        # out = retrieved_attn * gate + local_attn * (1 - gate)
 
+        # just add it?
         # out = local_attn + retrieved_attn
+
+        # just concatenate it?
+        out = torch.concat((local_attn, retrieved_attn), dim=-1)
 
         out = rearrange(out, 'b h l d -> b l (h d)', h=self.n_head)
         out = self.w_concat(out)
@@ -92,7 +97,7 @@ class KNNMemory:
             self.indices[i].reset()
 
     def add(self, kv):
-        kv = kv.cpu().detach().numpy()
+        kv = kv.detach().cpu().numpy()
 
         # @delayed
         # def knn_add(knn, x):
@@ -110,15 +115,16 @@ class KNNMemory:
         """TODO: add indices masks"""
         bsz, nhead, seqlen, dhead = queries.shape
         queries = queries.reshape(bsz, -1, dhead)
-        queries = queries.cpu().detach().numpy()
+        queries = queries.detach().cpu().numpy()
 
         # @delayed
         # def knn_search(knn, query):
-        #     score, value, vector = knn.search_and_reconstruct(query, topk)
+        #     vector = knn.search(query, topk)
         #     return torch.from_numpy(vector)
         #
         # vectors = Parallel(n_jobs=self.n_jobs)(knn_search(*args) for args in zip(self.indices, queries))
         # vectors = torch.stack(vectors).to(self.device)
+        # vectors = vectors.reshape(bsz, nhead, seqlen, 2, dhead)
         #
         # return vectors
 
@@ -174,9 +180,10 @@ class KNN:
         self.is_trained = True
 
     def add(self, x):
-        # if not self.is_trained:
-        #     self.train(x)
         keys = np.ascontiguousarray(x[..., 0, :])
+
+        if not self.is_trained:
+            self.train(keys)
 
         # add to memory
         for _x in x:
