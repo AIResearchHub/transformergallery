@@ -141,5 +141,6 @@ https://www.youtube.com/watch?v=i_pfHD4P_wg&ab_channel=SebastianRaschka
 https://theaisummer.com/self-attention/
 https://en.wikipedia.org/wiki/Softmax_function
 https://www.youtube.com/watch?v=A1eUVxscNq8&t=17s&ab_channel=SebastianRaschka
+https://d2l.ai/index.html
 
 
