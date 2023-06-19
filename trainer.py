@@ -7,22 +7,7 @@ from torch.optim import Adam
 import time
 
 from optim_schedule import ScheduledOptim
-
-
-def apply_mlm_mask(batch, mask_prob):
-    device = batch.device
-
-    probs = torch.rand(*batch.shape)
-    masks = (probs < mask_prob).to(device)
-
-    # create inputs
-    inputs = batch.detach() * torch.logical_not(masks).to(device)
-    inputs[inputs == 0] = 103
-
-    # create labels
-    labels = batch.detach() * masks
-
-    return inputs.long(), labels.long()
+from utils import apply_mlm_mask
 
 
 class Trainer:

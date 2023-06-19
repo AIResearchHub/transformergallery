@@ -134,10 +134,11 @@ def evaluate(self):
         plt.legend()
         plt.show()
 
+
 def main():
-    # model_path = "path/to/model.pth"
-    # data_path = "path/to/data.csv"
-    # config_path = "path/to/config.json"
+    model_path = "path/to/model.pth"
+    data_path = "path/to/data.csv"
+    config_path = "path/to/config.json"
 
     evaluator = Evaluator(model_path, data_path, config_path)
 

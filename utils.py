@@ -7,6 +7,22 @@ import torch
 import os
 
 
+def apply_mlm_mask(batch, mask_prob):
+    device = batch.device
+
+    probs = torch.rand(*batch.shape)
+    masks = (probs < mask_prob).to(device)
+
+    # create inputs
+    inputs = batch.detach() * torch.logical_not(masks).to(device)
+    inputs[inputs == 0] = 103
+
+    # create labels
+    labels = batch.detach() * masks
+
+    return inputs.long(), labels.long()
+
+
 def read_file(path):
     with open(path, 'r') as f:
         content = "".join(f.readlines())
