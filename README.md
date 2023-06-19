@@ -104,7 +104,10 @@ Let's start with $QK^T$.  Recall how each row of $Q$ and $K$ encodes certain inf
 Next, we'll think about what $\frac{1}{\sqrt{d_{Q}}}$ is and it's purpose.  Though $\frac{1}{\sqrt{d_{Q}}}$ is intimidating, it is just a scalar for $QK^T$.  Remember that $d_{Q}$ is the amount of columns in $W_{Q}$, and therefore also the number of columns in $Q$.  Also recall that $d_{Q} = d_{K}$, which not only makes the matrix multiplication of $QK^T$ possible, but means that we could use $d_{K}$ if we so desired. $\frac{1}{\sqrt{d_{Q}}}$ helps keep the values of $QK^T$ from exploding, and also helps with gradient descent in backpropogation.
 
 
-Softmax is defined as follows: for vector $z \in \mathbb{R}^K$ with elements $z_{i}, \forall i \in \mathbb{Z}^{+} \leq K$, then $$\text{softmax}(z_{i}) = \frac{ \exp{z_{i}} }{1} $$
+Softmax is defined as follows: for vector $z \in \mathbb{R}^K$ with elements $z_{i}, \forall i \in \mathbb{Z}^{+} \leq K$, then $$\text{softmax}(z_{i}) = \frac{ \exp{(z_{i})}}{\Sigma_{j=1}^{K} \exp{(z_{j})} } $$
+Softmax normalizes the values of $z$ (i.e. $\Sigma_{i}^{K} z_{i}$ = 1), guarentees differentiability for backpropogation, and augemnts the larger values of $z$ while diminishing the smaller ones, hence the name softmax.
+
+Notice how softmax is only defined for vectors, but we apply it to $\frac{QK^T}{\sqrt{d_{Q}}}$, a matrix, in our self-attention formula.  When we do softmax($\frac{QK^T}{\sqrt{d_{Q}}}$), we are implying that the softmax function is applied row-wise to the matrix, meaning that we replace each row with a soft-maxed version of itself.
 
 
 ### Sources:
