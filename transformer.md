@@ -29,7 +29,7 @@ While this idea takes the word's position relative to the whole sequence into ac
 
 Let's look at how the original transformer does it, then we will see why this choice of positional encoding makes the most sense.
 $$\text{If position $k$ is even: } P(k, 2i) = \text{sin}(\frac{k}{n^{2i/d}})$$
-$$\text{If position $k$ is odd: } P(k, 2i+!) = \text{cos}(\frac{k}{n^{2i/d}})$$
+$$\text{If position $k$ is odd: } P(k, 2i+1) = \text{cos}(\frac{k}{n^{2i/d}})$$
 Where:
 - $k \in \mathbb{Z} \text{ s.t. } 0 \leq k \leq L/2$ for sequence length $L$
 - $d$ is the dimention of the word embedding
