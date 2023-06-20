@@ -1,6 +1,10 @@
 # The Attention Mechanism
 
-** Write intro intuitively explaining attention - also state that this is from an NLP lense **
+The Attention Mechanism represents a milestone in the evolution of neural networks, particularly within the realm of Natural Language Processing (NLP). The core idea behind attention is the ability to focus on specific parts of an input when generating an output, enabling the model to pay 'attention' to contextual information that contributes most to understanding the input. Similar to how humans selectively focus on certain parts of an image or conversation, attention mechanisms allow models to associate different levels of relevance or importance to input features when making predictions.
+
+we'll explore the key concepts that underpin the Attention Mechanism, such as queries, keys, and values, which form the basis of the mechanism, and how they relate to the broader concept of attention in the context of NLP. We'll also delve into the mathematical formulation of attention, discussing its general formula, the ways we calculate weights, and different approaches to measuring similarity.
+
+Furthermore, we will introduce self-attention, a variant of the attention mechanism used extensively in state-of-the-art models like Transformers. We will help build an intuitive understanding of self-attention and its mathematical representation.
 
 ## Queries, Keys, and Values
 
@@ -157,6 +161,11 @@ Notationally, for the $i \text{th}$ head, we denote the $i \text{th}$ head's uni
 In a multi-head attention layer, the input $X$ gets fed to the multiple heads which use self-attention to produce a unique attention score, $S^{(i)}$, based on their own weights.  We then concatenate all the $S^{(i)}$ for $i \leq$ the number of heads.  Lastly, we feed the massive attention matrix through a feed-forward neural network, and, voila, we have just passed through a multi-head attention layer.
 
 ## Summary
+The Attention Mechanism revolutionized the way neural networks process information, making them more context-aware. Drawing parallels from how humans selectively focus on certain aspects of a situation, this mechanism assigns different levels of importance to various input features, thereby enhancing the model's performance in tasks like Machine Translation, Question Answering, and many more.
+
+The fundamentals of attention revolve around queries, keys, and values – terms borrowed from key-value databases. A query surveys the keys in a database, and when a key matches the query, the associated value is returned. In the context of attention, the more a key aligns with a query, the more its corresponding value influences the output. 
+
+One advanced form of attention, known as self-attention, has been successfully used in state-of-the-art Transformer models. Self-attention, in essence, evaluates the importance of each word in a sentence in relation to every other word, including itself. This concept allows models to capture long-range dependencies between words, which greatly improves their understanding of the input text.
 
 ### Sources:
 https://bi-insider.com/posts/key-value-nosql-databases/#:~:text=A%20key%2Dvalue%20database%20is,be%20queried%20or%20searched%20upon.
