@@ -17,7 +17,19 @@ In the following article, we will traverse this scary picture and try to make it
 A slight disclaimer: to understand the transformer, you need to understand self-attention and multi-head attention.  Knowledge of them will be assumed and used as a base in the following explanations.  We have an article outlining these attention mechanisms to a sufficient degree of rigor if you would like to learn about it or if you need to burnish your memory.
 
 ## Positional Encoding
-Before 
+Before both the encoder and decoder, the input embadding and output embedding must go through a positional encoding step.
+
+Transformers are attention-based models, so they are actually agnostic about each word's position, and, therefore, the potentially important positional relationships between words.
+
+The most simple form of positional encoding is simply assigning a positive integer to each word in the sentence.  This method does designate each word to a unique position, but it starts to get shakey when dealing with sequences of varying sizes.
+
+If the goal is to understand a position's relationship to the whole sentence, then, using this form of positional encoding, we'd be training our algorithm to treat the 3rd word of a 5 word sentnece the same as the 3rd word of a Harry Potter novel.  Clearly, both of these words have varying levels of importance relative to their entire sequence.
+
+Ok, then, what if we normalize that positional encoding score so that for a sequence of $n$ words, we just assign word $i$ to $\frac{i}{n}$?
+
+While this idea takes the a word's position relative to a 
+
+
 
 ## Encoder
 
@@ -25,5 +37,9 @@ Before
 
 ### Sources
 https://machinelearningmastery.com/the-transformer-model/
+https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/#:~:text=What%20Is%20Positional%20Encoding%3F,item's%20position%20in%20transformer%20models.
+https://medium.datadriveninvestor.com/transformer-break-down-positional-encoding-c8d1bbbf79a8
+
+
 
 
