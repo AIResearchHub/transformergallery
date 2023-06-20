@@ -21,14 +21,14 @@ Before both the encoder and decoder, the input embadding and output embedding mu
 
 Transformers are attention-based models, so they are actually agnostic about each word's position, and, therefore, the potentially important positional relationships between words.
 
-The most simple form of positional encoding is simply assigning a positive integer to each word in the sentence.  This method does designate each word to a unique position, but it starts to get shakey when dealing with sequences of varying sizes.
-
-If the goal is to understand a position's relationship to the whole sentence, then, using this form of positional encoding, we'd be training our algorithm to treat the 3rd word of a 5 word sentnece the same as the 3rd word of a Harry Potter novel.  Clearly, both of these words have varying levels of importance relative to their entire sequence.
+The most simple form of positional encoding is simply assigning a positive integer to each word in the sentence.  This method does designate each word to a unique position, but it starts to get shakey when dealing with sequences of varying sizes, which can make training difficult.  If we trained this way, it will make the model flounder on sequences of unseen lengths, since it won't know the significance of a position it has never seen.
 
 Ok, then, what if we normalize that positional encoding score so that for a sequence of $n$ words, we just assign word $i$ to $\frac{i}{n}$?
 
-While this idea takes the a word's position relative to a 
+While this idea takes the word's position relative to the whole sequence into account, it starts getting hairy when you assign .2 to the 1st word of a sequence of 5 and the 50th word of a 250 word long sequence.
 
+Let's look at how the original transformer does it, then we will see why this choice of positional encoding makes the most sense.
+$$\text{If position $k$ is even: } P(k, 2i) = \text{sin}(\frac{k}{n^{2i/d}})$$
 
 
 ## Encoder
