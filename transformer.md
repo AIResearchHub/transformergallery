@@ -12,10 +12,12 @@ The problem with this pricture is that, unless you already know the ins and outs
 
 In the following article, we will traverse this scary picture and try to make it seem like common sense.
 
-A slight disclaimer: to understand the transformer, you need to understand self-attention and multi-head attention.  Knowledge of them will be assumed and used as a base in the following explanations.  We have an article outlining these attention mechanisms to a satisfactory degree of rigor if you would like to learn about it or if you need to burnish your memory.
+** TALK ABOUT ENCODER DECODER MODEL **
 
+A slight disclaimer: to understand the transformer, you need to understand self-attention and multi-head attention.  Knowledge of them will be assumed and used as a base in the following explanations.  We have an article outlining these attention mechanisms to a sufficient degree of rigor if you would like to learn about it or if you need to burnish your memory.
 
 ## Positional Encoding
+Before 
 
 ## Encoder
 
