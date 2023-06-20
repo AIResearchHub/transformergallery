@@ -35,7 +35,7 @@ def main(seq_len=512,
     )
 
     lm = TransformerLM(
-        cls=MemorizingTransformer,
+        cls=Transformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,

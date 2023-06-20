@@ -2,17 +2,21 @@
 
 import torch.nn.functional as F
 
-from ..utils import apply_mlm_mask
+from utils import apply_mlm_mask
 
 
 def test_loss(model, dataloader):
-    for i, data in enumerate(dataloader):
-        inputs, target = apply_mlm_mask(data)
-        pred = model(inputs)
+    for i, batch in enumerate(dataloader):
+        timesteps, seqlen = batch.shape
+        inputs, targets = apply_mlm_mask(batch)
 
-        expected = expected.transpose(1, 2)
+        total_loss = 0
 
-        loss = self.criterion(expected, target)
-        return loss.mean()
+        model.module.reset()
+        for t in range(timesteps):
+            expected = model(inputs[:, t, :])
+            loss = F.nll_loss(expected.transpose(1, 2), targets[:, t, :])
+            total_loss += loss.item()
 
-        F.nll_loss(pred.transpose(1, 2), target)
+        return total_loss / (timesteps * seqlen)
+
