@@ -4,7 +4,7 @@
 
 ## Queries, Keys, and Values
 
-At the heart of attention lies queries, keys, and values.  The terminology is derived from a "key-value" database, which - as the name may suggest - pairs a key with its associated value, e.g. student name (key) and major (value), member ID (key) and date joined (value), business (key) and valuation (value).  Note that a key or a value can be any datatype.
+At the heart of attention lie queries, keys, and values.  The terminology is derived from a "key-value" database, which - as the name may suggest - pairs a key with its associated value, e.g. student name (key) and major (value), member ID (key) and date joined (value), business (key) and valuation (value).  Note that a key or a value can be any datatype.
 
 To retreive a value, we initiate a query, which then surveys the keys to see if any of the keys fullfill the query; if a key satisfies the query, the database then returns the key's associated value.  
 
@@ -15,6 +15,8 @@ We will use the following notation to refer to queries, keys, and values:
 Database $\textbf{D} = \lbrace(k_{1}, v_{1}), (k_{2}, v_{2}), ... , (k_{i}, v_{i}), ..., (k_{n-1}, v_{n-1}), (k_{n}, v_{n})\rbrace$ where each tuple $(k_{i}, v_{i})$ refers to a key, $k_{i}$, and its associated value, $v_{i}$.
 A query will be denoted by $q$.
 
+<img src="https://github.com/ArjunSohur/transformergallery/assets/44383158/1fd0357e-73b4-4b4b-bd36-cf22bf5acb51"  width="40%" height="40%">
+
 There are much more to queries, keys, and values, but, for the purposes of understanding attention, the information above suffices.  If you are intrested in databases beyond the bounds of attention, or simply want more information, we have provided some resources !!!WHERE!!!.
 
 ## The General Formula for Attention
@@ -23,13 +25,13 @@ The general formula for attention is as follows:
 
 $$\textrm{Attention}(q, \textbf{D}) = \Sigma_{i}\textrm{ similarity}(q, k_{i})v_{i}$$ where $\textbf{D} := \lbrace(k_{1}, v_{1}), (k_{2}, v_{2}),...,(k_{n}, v_{n})\rbrace$, and $q$ is a query.
 
-In mathmatical terms, attention is a linear combination of the similarity of queries and keys multiplied by the key's associated value for all 
+In mathmatical terms, attention is a linear combination of the similarity of queries and keys multiplied by the key's associated value for all keys.
 
 First, let's compare our new attention formula to searching a database using queries, keys, and values.  
 
-When searching a database, we often look for absolute matches, meaning the query and key are identical (similarity = 1).  If we have one student named "John Doe" in our registrar, when we query our database for "John Doe", we expect the similarity of the query and keys to be 0 everywhere except when the key is "John Doe".  Therefore, we'd have a image:
+When searching a database, we often look for absolute matches, meaning the query and key are identical (similarity = 1).  If we have one student named "John Doe" in our registrar, when we query our database for "John Doe", we expect the similarity of the query and keys to be 0 everywhere except when the key is "John Doe".  Therefore, we'd have:
 
-** 1D vector with query John Doe on dimention, and all the keys with a 1 hot for JD **
+<img src="https://github.com/ArjunSohur/transformergallery/assets/44383158/0edb657f-e9b7-4702-9ad2-008b09480085"  width="80%" height="80%">
 
 We'd also call this query/key vector a "one-hot matrix".  Intuitively, we can think of this version of query/key relationship as just a true/false one.
 
@@ -44,9 +46,21 @@ They might pay some attention to those with a 3.0 or 4.0 GPA (dissimilar keys) a
 
 This example begs the question: "What exactly is $\textrm{similarity}(q, k_{i})$"?  How will we knoe that it works for the example.  The answer is somewhat unsatisfying: we have to decide what $\textrm{similarity}(q, k_{i})$ is.
 
-Our similarity function can take many forms depending on the task at hand; the burden falls on the practitioner to select the most apporpriate for the task.  Here are some common weighting mechanisms:
+Our similarity function can take many forms depending on the task at hand; the burden falls on the practitioner to select the most apporpriate for the task.  
 
-** INSERT CHART OR SOMETHING**
+## Common Weight Calculation Methods:
+**Dot Product:** A method where attention weights are determined by calculating the dot product between the query and the key vectors. This aligns the direction of the vectors and emphasizes the similarity.
+
+**Scaled Dot Product:** An approach where the dot product between query and key vectors is scaled by the inverse square root of the vectors' dimensionality. This helps manage the scale of the values before applying the softmax function. (generally what is used in transformer models)
+
+**Additive:** A method using a single-hidden-layer feed-forward network to generate alignment scores between the query and key inputs. These scores are then normalized using a softmax function to produce the attention weights.
+
+**Multiplicative:** A technique where the dot product of the query and key vectors is calculated to produce the alignment scores, which are then converted into attention weights using softmax normalization.
+
+**Gating Mechanism:** An advanced approach where an additional gating factor, usually determined by a sigmoid function, is applied to the conventional attention weight calculation method. This allows for dynamic adjustment of attention weights.
+
+**Sparse Attention:** A strategy that selectively determines the calculation of attention weights based on selected positions within the sequence. This results in sparse weighting matrices and improves computational efficiency.
+
 
 ## Self Attention
 
