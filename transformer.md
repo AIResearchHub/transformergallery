@@ -8,6 +8,9 @@ If you've ever looked up a tutorial on transformers, you've likely seen this ima
 
 <img width="298" alt="Screen Shot 2023-06-20 at 3 23 50 PM" src="https://github.com/ArjunSohur/transformergallery/assets/105809809/1123363a-f956-450e-abc2-70909c555651">
 
+The problem with this pricture is that, unless you already know the ins and outs of a transformer model, the picture can be very confusing.
+
+In the following article, we will traverse this scary picture and 
 
 ## Positional Encoding
 
