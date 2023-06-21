@@ -38,16 +38,17 @@ def test_memory(model, dataloader):
         dataloader (Dataloader): Batch size 1 dataloader with entire book length and shape (timesteps, seqlen)
     """
     for i, batch in enumerate(dataloader):
-        timesteps, seqlen = batch.shape
+        bsz, timesteps, seqlen = batch.shape
 
         inputs, targets = apply_memory_mask(batch)
         total_loss = 0
 
-        model.module.reset()
-        for t in range(timesteps):
-            expected = model(inputs[:, t, :])
-            loss = F.nll_loss(expected.transpose(1, 2), targets[:, t, :])
-            total_loss += loss.item()
+        with torch.no_grad():
+            model.module.reset()
+            for t in range(timesteps):
+                expected = model(inputs[:, t, :])
+                loss = F.nll_loss(expected.transpose(1, 2), targets[:, t, :])
+                total_loss += loss.item()
 
-        return total_loss / (timesteps * seqlen)
+        print(total_loss / (timesteps * seqlen * bsz))
 

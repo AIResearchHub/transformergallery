@@ -109,3 +109,62 @@ class BlockMemorizingTransformer(nn.Module):
 
         return out
 
+    def load_pretrained(self):
+        """
+        load pretrained weights from huggingface transformers
+        """
+        assert self.d_model == 768, "dim has to be 768"
+        assert (self.n_layers <= 12), "num layers exceed 12"
+
+        from transformers import AutoModel
+        pretrained = AutoModel.from_pretrained("bert-base-uncased")
+        state_dict = pretrained.state_dict()
+
+        print("dim: ", self.d_model)
+
+        for x in state_dict.keys():
+            print(x, " -> ", state_dict[x].shape)
+
+            if x.startswith("embeddings"):
+                if x.endswith("word_embeddings.weight"):
+                    self.embedding.tok_emb.emb.weights = nn.Parameter(state_dict[x].detach())
+
+            if x.startswith("encoder.layer"):
+                layer_num = int(x[14])
+
+                if layer_num < self.n_layers // 2:
+                    if x.endswith("self.query.weight"):
+                        self.layers1[layer_num].attention.w_q.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.query.bias"):
+                        self.layers1[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.key.weight"):
+                        self.layers1[layer_num].attention.w_k.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.key.bias"):
+                        self.layers1[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.value.weight"):
+                        self.layers1[layer_num].attention.w_v.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.value.bias"):
+                        self.layers1[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("output.dense.weight"):
+                        self.layers1[layer_num].attention.w_concat.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("output.dense.bias"):
+                        self.layers1[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+
+                elif layer_num < self.n_layers:
+                    if x.endswith("self.query.weight"):
+                        self.layers2[layer_num].attention.w_q.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.query.bias"):
+                        self.layers2[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.key.weight"):
+                        self.layers2[layer_num].attention.w_k.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.key.bias"):
+                        self.layers2[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.value.weight"):
+                        self.layers2[layer_num].attention.w_v.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("self.value.bias"):
+                        self.layers2[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("output.dense.weight"):
+                        self.layers2[layer_num].attention.w_concat.weights = nn.Parameter(state_dict[x].detach())
+                    if x.endswith("output.dense.bias"):
+                        self.layers2[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+

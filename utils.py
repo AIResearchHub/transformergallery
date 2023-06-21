@@ -1,4 +1,5 @@
-from pytorch_pretrained_bert import BertTokenizer
+
+from transformers import BertTokenizerFast, BartTokenizerFast
 
 import logging
 logging.getLogger("pytorch_pretrained_bert.tokenization").setLevel(logging.ERROR)
@@ -36,7 +37,14 @@ def read_data(folderpath, max_files):
 
 
 def tokenize(texts):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    """
+    Parameters:
+        texts (List[string]): A list of strings, each string represents a book etc.
+
+    Returns:
+        output (List[List[int]]): A list of list of ints, each list of ints represent a tokenized book
+    """
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
     return [tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text)) for text in texts]
 
 
@@ -58,3 +66,9 @@ def create_pg19_data(path, max_len, max_files):
     data = partition(tokenize(read_data(path, max_files=max_files)), max_len=max_len)
 
     return data
+
+
+if __name__ == "__main__":
+    x = tokenize(["hello world, what is going on", "hello wrold, wha  dsa dkwkoaksdm"])
+    print(x)
+

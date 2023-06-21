@@ -9,17 +9,17 @@ from dataset import PG19Dataset
 
 def main(seq_len=512,
          vocab_size=30522,
-         n_layers=4,
-         d_model=768,
+         n_layers=2,
+         d_model=512,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=32,
+         batch_size=2,
          n_accumulate=1,
          burnin=0,
          rollout=1,
          warmup_steps=100,
-         device="cuda",
+         device="cpu",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 

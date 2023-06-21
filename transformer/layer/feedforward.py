@@ -25,7 +25,6 @@ class FeedForward(nn.Module):
         super(FeedForward, self).__init__()
 
         self.ff = nn.Sequential(
-            nn.LayerNorm(dim),
             nn.Linear(dim, inner_dim),
             nn.GELU(),
             nn.Linear(inner_dim, dim)

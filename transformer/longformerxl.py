@@ -49,6 +49,9 @@ class LongformerXL(nn.Module):
 
         self.reset()
 
+    def from_pretrained(self):
+        pass
+
     def reset(self):
         self.state = None
 
