@@ -14,10 +14,10 @@ class LongformerLayer(nn.Module):
     normalization, dropout, and a feed-forward network
 
     Parameters:
-    d_model (int): The dimension of the model
-    ffn_hidden (int): The size of the hidden layer in the feed forward network
-    n_head (int): The number of attention heads
-    p (float): The probability of dropout
+        d_model (int): The dimension of the model
+        ffn_hidden (int): The size of the hidden layer in the feed forward network
+        n_head (int): The number of attention heads
+        p (float): The probability of dropout
     """
 
     def __init__(self, d_model, ffn_hidden, n_head, p):
@@ -53,10 +53,10 @@ class LongformerLayerHuggingface(nn.Module):
     normalization, dropout, and a feed-forward network.
 
     Parameters:
-    d_model (int): The dimension of the model.
-    ffn_hidden (int): The size of the hidden layer in the feed-forward network.
-    n_head (int): The number of attention heads.
-    p (float): The probability of dropout.
+        d_model (int): The dimension of the model.
+        ffn_hidden (int): The size of the hidden layer in the feed-forward network.
+        n_head (int): The number of attention heads.
+        p (float): The probability of dropout.
     """
 
     def __init__(self, d_model, ffn_hidden, n_head, p):

@@ -8,8 +8,11 @@ from .layer import TransformerEmbedding, XLAttentionLayer, RecurrentLayer, Memor
 
 class BlockMemorizingTransformer(nn.Module):
     """
-    Block Recurrent Transformer with a recurrent attention layer
-    sandwiched in between transformer xl layers
+    Block Memorizing Transformer is a hybrid between
+    Block Recurrent Transformer and Memorizing Transformer.
+    It uses both recurrent layers and kNN search memorizing layer
+    for enhanced long range capabilities. It combines multiple
+    state-of-the-art techniques to try to improve SOTA.
     """
 
     def __init__(self,

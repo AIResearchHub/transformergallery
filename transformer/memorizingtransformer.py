@@ -7,6 +7,15 @@ from .layer import TransformerEmbedding, AttentionLayer, MemorizingLayer
 
 
 class MemorizingTransformer(nn.Module):
+    """
+    Memorizing Transformer was proposed in
+    https://github.com/lucidrains/memorizing-transformers-pytorch.
+    It uses a memorizing layer that stores past keys and values
+    into an index that is then retrieved via a kNN search.
+    The queries are matched against keys for maximum inner product,
+    and the most similar key/value pair are retrieved.
+    This allows for long range memory that scales up to 300k tokens.
+    """
 
     def __init__(self,
                  vocab_size,

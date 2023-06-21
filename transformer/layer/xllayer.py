@@ -7,7 +7,12 @@ from .feedforward import FeedForward
 
 
 class XLAttentionLayer(nn.Module):
-
+    """
+    XL Attention Layer from Transformer XL,
+    the previous hidden state is cached as mem.
+    In the transformer model, the memories are stored
+    in a list.
+    """
     def __init__(self, d_model, ffn_hidden, n_head, p):
         super(XLAttentionLayer, self).__init__()
         self.attention = XLAttention(d_model=d_model, n_head=n_head)

@@ -17,8 +17,8 @@ class FeedForward(nn.Module):
         )
 
     Parameters:
-    dim (int): The dimension of the input and output
-    inner_dim (int): The dimension of the hidden layer
+        dim (int): The dimension of the input and output
+        inner_dim (int): The dimension of the hidden layer
     """
 
     def __init__(self, dim, inner_dim):

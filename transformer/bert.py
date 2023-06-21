@@ -6,6 +6,11 @@ import torch.nn.functional as F
 
 class BertLM(nn.Module):
     """
+    BERT is short for Bidirectional Encoder Representation for Transformers.
+    It uses masked language modeling to pretrain its weights.
+    It has a output head with log softmax activation and uses
+    negative-log-likelihood loss.
+
     Any kind of transformer cls has parameters:
         vocab_size
         max_len
@@ -15,9 +20,10 @@ class BertLM(nn.Module):
         p
 
     and functions:
-        state_forward(x, state) -> state
-        forward(x,state) -> x, state
-
+        load_pretrained()
+        reset()
+        set_state()
+        get_state()
     """
 
     def __init__(self,
@@ -32,7 +38,7 @@ class BertLM(nn.Module):
                  **kwargs
                  ):
 
-        super(TransformerLM, self).__init__()
+        super(BertLM, self).__init__()
 
         self.vocab_size = vocab_size
         self.max_len = max_len

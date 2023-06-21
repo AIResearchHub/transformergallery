@@ -8,6 +8,11 @@ from .feedforward import FeedForward
 
 
 class MemorizingLayer(nn.Module):
+    """
+    The kNN search layer from Memorizing Trasnformer
+    Currently takes has long runtime, need to optimize
+    the kNN attention in the future for shorter runtime.
+    """
 
     def __init__(self, d_model, ffn_hidden, n_head, p, bsz, device):
         super(MemorizingLayer, self).__init__()

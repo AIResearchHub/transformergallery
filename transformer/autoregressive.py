@@ -6,6 +6,10 @@ import torch.nn.functional as F
 
 class AutoregressiveLM(nn.Module):
     """
+    This class is a wrapper around transformer variants for autoregressive language
+    models (aka next word prediction). It uses cross entropy instead of
+    negative-log-likelihood and its last layer has no bias with no activation.
+
     Any kind of transformer cls has parameters:
         vocab_size
         max_len
@@ -15,9 +19,10 @@ class AutoregressiveLM(nn.Module):
         p
 
     and functions:
-        state_forward(x, state) -> state
-        forward(x,state) -> x, state
-
+        load_pretrained()
+        reset()
+        set_state()
+        get_state()
     """
 
     def __init__(self,
@@ -52,7 +57,7 @@ class AutoregressiveLM(nn.Module):
             **kwargs
         )
 
-        self.lm_head = nn.Linear(d_model, vocab_size)
+        self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
 
     def load_pretrained(self):
         self.transformer.load_pretrained()

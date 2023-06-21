@@ -47,6 +47,10 @@ class Trainer:
         self.updates = 0
 
     def run_epoch(self, epoch):
+        """
+        Main training loop for one epoch.
+        Logs and prints time and loss.
+        """
 
         for i, batch in enumerate(self.dataloader):
             if batch.size(0) != self.batch_size:
@@ -70,6 +74,10 @@ class Trainer:
                 torch.save(self.model, "saved/final")
 
     def step(self, batch):
+        """
+        A training step that does backpropagation at each rollout timestep.
+        To train long sequence transformer models such as Transformer XL.
+        """
         total_loss = 0
         inputs, targets = apply_mlm_mask(batch, mask_prob=0.25)
 

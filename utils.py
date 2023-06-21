@@ -9,6 +9,13 @@ import os
 
 
 def apply_mlm_mask(batch, mask_prob):
+    """
+    A function to apply masked language modeling for BERT.
+
+    Parameters:
+        batch (Tensor): The tensor with ids to be masked
+        mask_prob (int): Masking probabilities for each token
+    """
     device = batch.device
 
     probs = torch.rand(*batch.shape)

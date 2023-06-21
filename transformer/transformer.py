@@ -13,12 +13,12 @@ class Transformer(nn.Module):
     output of the last transformer layer
 
     Parameters:
-    vocab_size (int): Vocabulary size
-    max_len (int): Max length
-    n_layers (int): Number of layers
-    d_model (int): Dimension of transformer
-    n_head (int): Number of attention heads
-    p (int): Dropout probability
+        vocab_size (int): Vocabulary size
+        max_len (int): Max length
+        n_layers (int): Number of layers
+        d_model (int): Dimension of transformer
+        n_head (int): Number of attention heads
+        p (int): Dropout probability
 
     """
 

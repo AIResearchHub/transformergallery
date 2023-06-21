@@ -15,8 +15,8 @@ class RecurrentAttention(nn.Module):
     It also uses transformer xl cache memory
 
     Parameters:
-    d_model (int): Dimension of model
-    n_head (int): Number of attention heads
+        d_model (int): Dimension of model
+        n_head (int): Number of attention heads
 
     """
 

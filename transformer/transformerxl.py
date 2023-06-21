@@ -9,16 +9,17 @@ from transformers import TransfoXLModel
 
 class TransformerXL(nn.Module):
     """
-    A standard Transformer module that outputs the unprocessed
-    output of the last transformer layer
+    Transformer XL is an upgrade to Transformer that caches
+    the previous keys and values to be concatenated with
+    current keys and values for Extra Long sequence lengths.
 
     Parameters:
-    vocab_size (int): Vocabulary size
-    max_len (int): Max length
-    n_layers (int): Number of layers
-    d_model (int): Dimension of transformer
-    n_head (int): Number of attention heads
-    p (int): Dropout probability
+        vocab_size (int): Vocabulary size
+        max_len (int): Max length
+        n_layers (int): Number of layers
+        d_model (int): Dimension of transformer
+        n_head (int): Number of attention heads
+        p (int): Dropout probability
 
     """
 

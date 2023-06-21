@@ -14,10 +14,17 @@ class KNNAttention(nn.Module):
     """
     An attention module that contains a kNN memory
     (idea from memorizing transformer and unlimiformer)
-    Instead of standard attention with computed q, k, v
-    the q is searched against past cached hidden states
-    to find the most similar hidden states that is then
-    used to compute k and v
+    Instead of standard attention with computed query,
+    keys, and values, the query is searched against cached
+    keys and values to incorporate past information.
+    A few tricks are used from the paper such as
+    normalizing keys and values to prevent distribution shift,
+    even if the weights has changed, the magnitude of the keys and
+    values remain the same because of normalization.
+
+    Parallel code taken from lucidrains memorizing transformer
+    however it runs slower than for loop.
+
     """
 
     def __init__(self, d_model, n_head, bsz, device):

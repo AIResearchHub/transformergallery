@@ -6,7 +6,9 @@ import torch.nn.functional as F
 
 class Attention(nn.Module):
     """
-    Attention module for Transformer layers
+    Attention module for Transformer layers.
+    Composes of learnable parameters in
+    query, key, value and concat linear modules.
     """
 
     def __init__(self, d_model, n_head):

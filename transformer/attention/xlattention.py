@@ -9,7 +9,10 @@ import math
 
 class XLAttention(nn.Module):
     """
-    Attention module for Transformer layers
+    XL Attention that incorporates previous cached keys and values.
+    Main difference from standard attention is this
+            attn_score = torch.einsum('bhid,bojd->bhij', (q, k))
+    to adjust for different length queries and key/value pair.
     """
 
     def __init__(self, d_model, n_head):

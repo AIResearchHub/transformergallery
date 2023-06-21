@@ -10,8 +10,17 @@ from .layer import TransformerEmbedding, AttentionLayer, XLAttentionLayer, Recur
 
 class BlockRecurrentTransformer(nn.Module):
     """
-    Block Recurrent Transformer with a recurrent attention layer
-    sandwiched in between transformer xl layers
+    Block Recurrent Transformer was proposed by this paper:
+    https://arxiv.org/pdf/2203.07852.pdf
+    It is composed of a recurrent attention layer
+    sandwiched in between transformer xl layers.
+    The recurrent layer is trained via BPTT, and it
+    uses shared keys and values from inputs and recurrent states
+    to share information across past inputs and current inputs
+
+    Parameters:
+        w (int): window size to iterate over per sequence
+        statelen (int): Length of the recurrent state e.g. (bsz, statelen, dim)
     """
 
     def __init__(self,
@@ -23,7 +32,6 @@ class BlockRecurrentTransformer(nn.Module):
                  p=0.1,
                  w=512,
                  device="cuda",
-                 xl=True,
                  statelen=32,
                  ):
         super(BlockRecurrentTransformer, self).__init__()
