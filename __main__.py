@@ -34,7 +34,7 @@ def main(seq_len=512,
         batch_size=batch_size,
     )
 
-    lm = TransformerLM(
+    lm = BertLM(
         cls=Transformer,
         vocab_size=vocab_size,
         max_len=seq_len,

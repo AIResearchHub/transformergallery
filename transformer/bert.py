@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class TransformerLM(nn.Module):
+class BertLM(nn.Module):
     """
     Any kind of transformer cls has parameters:
         vocab_size
@@ -53,6 +53,9 @@ class TransformerLM(nn.Module):
         )
 
         self.lm_head = nn.Linear(d_model, vocab_size)
+
+    def load_pretrained(self):
+        self.transformer.load_pretrained()
 
     def reset(self):
         return self.transformer.reset()
