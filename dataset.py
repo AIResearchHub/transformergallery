@@ -24,7 +24,7 @@ class PG19Dataset(Dataset):
         self.data = load_dataset("pg19", split=split, cache_dir=cache_dir)
         print("Dataset loaded")
         start = time.time()
-        self.data = partition(tokenize([data["text"] for data in self.data]), max_len=seq_len)
+        self.data = filter_empty(partition(tokenize([data["text"] for data in self.data]), max_len=seq_len))
         print("Dataset tokenized and partitioned in ", time.time() - start)
 
         self.seq_len = seq_len

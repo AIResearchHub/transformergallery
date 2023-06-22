@@ -65,12 +65,18 @@ def partition(ids, max_len):
             for id in ids]
 
 
+def filter_empty(data, min_len=1):
+    return [x for x in data if x.size(0) >= min_len]
+
+
 def create_pg19_data(path, max_len, max_files):
     """
     :return: List[Tensor(length, max_len)], None
     """
 
     data = partition(tokenize(read_data(path, max_files=max_files)), max_len=max_len)
+    # remove empty data
+    data = [x for x in data if x.size(0) != 0]
 
     return data
 

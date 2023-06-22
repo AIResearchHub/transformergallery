@@ -24,7 +24,7 @@ class Attention(nn.Module):
         # self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
         # self.w_concat = nn.Linear(d_model, d_model, bias=False)
 
-    def forward(self, q, kv, mask=None):
+    def forward(self, q, kv, mask=None, is_causal=False):
         """
         Parameters:
         q:     [batch_size, length, d_model]
@@ -39,7 +39,7 @@ class Attention(nn.Module):
         # q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
         # q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
-        out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
+        out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask, is_causal=is_causal)
 
         out = self.concat(out)
         out = self.w_concat(out)

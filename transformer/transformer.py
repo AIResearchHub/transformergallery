@@ -60,7 +60,7 @@ class Transformer(nn.Module):
     def get_state(self):
         return self.state
 
-    def forward(self, ids):
+    def forward(self, ids, is_causal):
         """
         Computes transformer output
 
@@ -76,7 +76,7 @@ class Transformer(nn.Module):
         x = self.embedding(ids)
 
         for layer in self.layers:
-            x = layer(x)
+            x = layer(x, is_causal=is_causal)
 
         return x
 

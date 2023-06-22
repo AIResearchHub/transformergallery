@@ -3,38 +3,39 @@
 from torch.utils.data import DataLoader
 
 from transformer import *
-from trainer import Trainer
+from autoregressivetrainer import AutoregressiveTrainer
+from berttrainer import BertTrainer
 from dataset import PG19Dataset
 
 
 def main(seq_len=512,
          vocab_size=30522,
-         n_layers=2,
+         n_layers=4,
          d_model=512,
          n_head=8,
          p=0.1,
          lr=1e-4,
-         batch_size=2,
+         batch_size=16,
          n_accumulate=1,
          burnin=0,
-         rollout=10,
+         rollout=1,
          warmup_steps=100,
-         device="cpu",
+         device="cuda",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 
     dataloader = DataLoader(
         PG19Dataset(
             cache_dir=cache_dir,
-            split="validation",
-            seq_len=seq_len,
+            split="train[:1000]",
+            seq_len=seq_len + 1,
             block_len=rollout,
             device=device
         ),
         batch_size=batch_size,
     )
 
-    lm = BertLM(
+    lm = AutoregressiveLM(
         cls=Transformer,
         vocab_size=vocab_size,
         max_len=seq_len,
@@ -48,7 +49,7 @@ def main(seq_len=512,
         topk=1,
     )
 
-    trainer = Trainer(
+    trainer = AutoregressiveTrainer(
         model=lm,
         dataloader=dataloader,
         lr=lr,

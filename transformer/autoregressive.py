@@ -73,7 +73,7 @@ class AutoregressiveLM(nn.Module):
 
     def forward(self, x):
         # no log softmax for cross entropy
-        x = self.transformer(x)
+        x = self.transformer(x, is_causal=True)
         x = self.lm_head(x)
 
         return x

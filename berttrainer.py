@@ -10,7 +10,7 @@ from optim_schedule import ScheduledOptim
 from utils import apply_mlm_mask
 
 
-class Trainer:
+class BertTrainer:
 
     def __init__(self,
                  model,
