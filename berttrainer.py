@@ -18,7 +18,6 @@ class BertTrainer:
                  dataloader,
                  lr,
                  batch_size,
-                 n_accumulate,
                  seqlen,
                  burnin,
                  rollout,
@@ -36,7 +35,6 @@ class BertTrainer:
 
         self.dataloader = dataloader
         self.batch_size = batch_size
-        self.n_accumulate = n_accumulate
 
         self.seqlen = seqlen
         self.burnin = burnin

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from transformers import BertTokenizerFast
 
 
-def main(prompt="hello world", num_samples=10, device="cpu"):
+def main(prompt="they", num_samples=10, device="cuda"):
     model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
@@ -23,8 +23,8 @@ def main(prompt="hello world", num_samples=10, device="cpu"):
         # pred (bsz, 1)
         x = torch.concat((x, idx_next), dim=-1)
 
-    sentence = tokenizer.batch_decode(x.squeeze())
-    for s in sentence:
+    for sample in x:
+        sentence = tokenizer.batch_decode(sample)
         print(' '.join(sentence))
 
 
