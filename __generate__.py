@@ -10,7 +10,7 @@ def main(prompt="hello world"):
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     # (bsz, seqlen)
-    x = torch.tensor(2000, dtype=torch.int64).view(1, 1).cuda()
+    x = torch.tensor(2002, dtype=torch.int64).view(1, 1).cuda()
     for _ in range(500):
         logits = model(x)
         logits = logits[:, -1, :]

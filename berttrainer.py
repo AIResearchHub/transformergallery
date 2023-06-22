@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.optim import Adam
 
 import time
+import datetime
 
 from optim_schedule import ScheduledOptim
 from utils import apply_mlm_mask
@@ -42,7 +43,8 @@ class BertTrainer:
         self.rollout = rollout
         self.length = burnin + rollout
 
-        self.log = open(f"logs/lm", "w")
+        self.dt = f"{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')}.txt"
+        self.log = open(f"logs/{self.dt}", "w")
         self.start = time.time()
         self.updates = 0
 
