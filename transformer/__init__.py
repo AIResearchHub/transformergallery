@@ -1,6 +1,7 @@
 
 
-from .languagemodel import TransformerLM
+from .autoregressive import AutoregressiveLM
+from .bert import BertLM
 
 from .transformer import Transformer, TransformerHuggingface
 from .transformerxl import TransformerXL

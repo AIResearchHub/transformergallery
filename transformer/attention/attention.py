@@ -6,16 +6,23 @@ import torch.nn.functional as F
 
 class Attention(nn.Module):
     """
-    Attention module for Transformer layers
+    Attention module for Transformer layers.
+    Composes of learnable parameters in
+    query, key, value and concat linear modules.
     """
 
     def __init__(self, d_model, n_head):
         super(Attention, self).__init__()
         self.n_head = n_head
 
-        self.w_q = nn.Linear(d_model, d_model, bias=False)
-        self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
-        self.w_concat = nn.Linear(d_model, d_model, bias=False)
+        self.w_q = nn.Linear(d_model, d_model, bias=True)
+        self.w_k = nn.Linear(d_model, d_model, bias=True)
+        self.w_v = nn.Linear(d_model, d_model, bias=True)
+        self.w_concat = nn.Linear(d_model, d_model, bias=True)
+
+        # self.w_q = nn.Linear(d_model, d_model, bias=False)
+        # self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
+        # self.w_concat = nn.Linear(d_model, d_model, bias=False)
 
     def forward(self, q, kv, mask=None):
         """
@@ -26,8 +33,11 @@ class Attention(nn.Module):
         Returns:
         out:   [batch_size, length, d_model]
         """
-        q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
-        q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
+        q, k, v = self.w_q(q), self.w_k(kv), self.w_v(kv)
+        q, k, v = self.split(q), self.split(k), self.split(v)
+
+        # q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
+        # q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
         out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask)
 

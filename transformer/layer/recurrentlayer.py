@@ -7,7 +7,12 @@ from .feedforward import FeedForward
 
 
 class RecurrentLayer(nn.Module):
+    """
+    A recurrent layer from Block Recurrent Transformer.
+    Trained via BPTT. If window size = 512 and sequence
+    length = 1024, then its length 2 BPTT.
 
+    """
     def __init__(self, d_model, ffn_hidden, n_head, p):
         super(RecurrentLayer, self).__init__()
         self.attention = RecurrentAttention(d_model=d_model, n_head=n_head)

@@ -9,23 +9,24 @@ from transformers import LongformerModel
 
 class Longformer(nn.Module):
     """
-    A standard Longformer module that outputs the unprocessed
-    output of the last transformer layer
+    Longformer is an improvement over Transformer that enables
+    it to attend to long sequences without the quadratic memory
+    requirements by Transformer. The sliding window attention
+    allows it to scale to 10k tokens with linear memory requirements.
 
     Benchmarks:
-    Transfomer seqlen 4096 = 6090MB
-    Transformer seqlen 8192 = 19202MB
-
-    Longformer seqlen 4096 = 5474MB
-    Longformer seqlen 8192 = 9550MB
+        Transfomer seqlen 4096 = 6090MB
+        Transformer seqlen 8192 = 19202MB
+        Longformer seqlen 4096 = 5474MB
+        Longformer seqlen 8192 = 9550MB
 
     Parameters:
-    vocab_size (int): Vocabulary size
-    max_len (int): Max length
-    n_layers (int): Number of layers
-    d_model (int): Dimension of transformer
-    n_head (int): Number of attention heads
-    p (int): Dropout probability
+        vocab_size (int): Vocabulary size
+        max_len (int): Max length
+        n_layers (int): Number of layers
+        d_model (int): Dimension of transformer
+        n_head (int): Number of attention heads
+        p (int): Dropout probability
 
     """
 
@@ -52,6 +53,9 @@ class Longformer(nn.Module):
              for _ in range(n_layers)])
 
         self.reset()
+
+    def from_pretrained(self):
+        pass
 
     def reset(self):
         self.state = None
