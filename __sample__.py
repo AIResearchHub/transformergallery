@@ -5,12 +5,14 @@ import torch.nn.functional as F
 from transformers import BertTokenizerFast
 
 
-def main(prompt="hello world"):
-    model = torch.load("saved/final").cuda()
+def main(prompt="hello world", num_samples=10, device="cpu"):
+    model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     # (bsz, seqlen)
-    x = torch.tensor(2002, dtype=torch.int64).view(1, 1).cuda()
+    x = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
+    x = torch.tensor(x, dtype=torch.int64, device=device).repeat(num_samples, 1)
+
     for _ in range(500):
         logits = model(x)
         logits = logits[:, -1, :]
@@ -22,7 +24,8 @@ def main(prompt="hello world"):
         x = torch.concat((x, idx_next), dim=-1)
 
     sentence = tokenizer.batch_decode(x.squeeze())
-    print(' '.join(sentence))
+    for s in sentence:
+        print(' '.join(sentence))
 
 
 if __name__ == "__main__":
