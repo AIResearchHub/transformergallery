@@ -41,7 +41,8 @@ Let's think about how is happening for a bit.  We are creating a vector for the 
 
 It is important to see how our formula produces entirely different vectors of dimention $d$ for every position.  The trick lies in the behavior of the sinusidal functions and the clever way the formula was set up.  Without launching into a trigonometry lesson, putting $pos$ in the numerator of the angle of the sinusidal function (along with the rest of the formula) guarentees that no two position's formula's are the same.  If you want to play with the variables of the formula, a well as get a better intrinsic understanding as to why the last statement is true, check out this graph:
 
-[https://www.desmos.com/calculator/rxicofcshj](url)
+https://www.desmos.com/calculator/x5qk7e5dut
+
 
 
 ## Encoder
