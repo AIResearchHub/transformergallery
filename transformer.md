@@ -34,10 +34,10 @@ To create a positional vector of dimention $d$ for position $pos$ in our sequenc
 $$ (p_{pos})^{(2i)} = \text{sin}(\frac{pos}{n^{2i/d}}) \text{ and } (p_{pos})^{(2i+1)} = \text{cos}(\frac{pos}{n^{2i/d}})$$
 
 Where:
-- $(p_{pos})^{(k)} \in \mathbb{R}$ denotes the scalar corresponding $k$th dimention of $p_{pos}$ (or the $k$th element in the $p_{pos}$ array to use CS verbiage)
+- $(p_{pos})^{(k)} \in \mathbb{R}$ denotes the scalar corresponding $k$th dimention of $p_{pos}$ (or the $k$ th element in the $p_{pos}$ array to use CS verbiage)
 - $n$ is some predetermined number; the original transformer authors set it to $n=10000$
 
-What this function does is it creates a vector with dimention d that is unique to each $pos$.  For every $pos$, we iterate thorugh $i$ (which, based on the way P is defined, )
+Let's think about how is happening for a bit.  We are creating a vector for the arbitrary position $pos$ of our sequence, which we are calling $p_{pos}$.  The values of $p_{pos}$ will be defined two at a time with index variable $i$ (we set $0 \leq i < d/2$ , where $d$ is the dimention or length of $p_{pos}$, so that we stay in the bounds of $p_{pos}$ since one $i$ will define two values of $p_{pos}$ at a time).
 
 ## Encoder
 
