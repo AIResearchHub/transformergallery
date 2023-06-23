@@ -43,6 +43,10 @@ It is important to see how our formula produces entirely different vectors of di
 
 https://www.desmos.com/calculator/x5qk7e5dut
 
+In the end, we add these positional vectors to our preexisting word embeddings so that our transformer has information about the position of each word built into each vector.
+
+** Questions to answer: why does it alternate functinos for even/odd?  How does the model significance of the positional vectors (how does it know what position a word is in if it just receives a vector with no indication of how much of that vector was influenced by the positional encoding); does it just learn them in traning? **
+
 
 
 ## Encoder
