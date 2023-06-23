@@ -67,7 +67,8 @@ class AutoregressiveTrainer:
                       f"Loss: {loss} \t "
                       f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
-            if i % 10000 == 0:
+            if i % 1000 == 0:
+                self.model.module.reset()
                 torch.save(self.model, "saved/final")
 
     def step(self, batch):
@@ -84,10 +85,15 @@ class AutoregressiveTrainer:
             loss = self.cross_entropy_loss(expected, targets[:, t, :])
             self.opt.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
-            self.opt.step()
 
             total_loss += loss.item()
+
+        for x in self.model.parameters():
+            if x.grad is not None:
+                x.grad.data.mul_(1/self.rollout)
+
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
+        self.opt.step()
 
         return total_loss / (self.rollout * self.seqlen)
 
