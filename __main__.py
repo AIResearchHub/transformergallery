@@ -10,33 +10,21 @@ from dataset import PG19Dataset
 
 def main(seq_len=512,
          vocab_size=30522,
-         n_layers=4,
-         d_model=512,
+         n_layers=8,
+         d_model=768,
          n_head=8,
          p=0.1,
-         lr=1e-4,
+         lr=4e-5,
          batch_size=16,
-         n_accumulate=1,
          burnin=0,
-         rollout=1,
+         rollout=5,
          warmup_steps=100,
          device="cuda",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 
-    dataloader = DataLoader(
-        PG19Dataset(
-            cache_dir=cache_dir,
-            split="train[:1000]",
-            seq_len=seq_len + 1,
-            block_len=rollout,
-            device=device
-        ),
-        batch_size=batch_size,
-    )
-
     lm = AutoregressiveLM(
-        cls=Transformer,
+        cls=TransformerXL,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -48,13 +36,24 @@ def main(seq_len=512,
         bsz=batch_size,
         topk=1,
     )
+    lm.load_pretrained()
+
+    dataloader = DataLoader(
+        PG19Dataset(
+            cache_dir=cache_dir,
+            split="train[:5000]",
+            seq_len=seq_len + 1,
+            block_len=rollout,
+            device=device
+        ),
+        batch_size=batch_size,
+    )
 
     trainer = AutoregressiveTrainer(
         model=lm,
         dataloader=dataloader,
         lr=lr,
         batch_size=batch_size,
-        n_accumulate=n_accumulate,
         seqlen=seq_len,
         burnin=burnin,
         rollout=rollout,

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from transformers import BertTokenizerFast
 
 
-def main(prompt="hello world", num_samples=10, device="cpu"):
+def main(prompt="once upon a time", num_samples=10, device="cuda"):
     model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
@@ -13,6 +13,7 @@ def main(prompt="hello world", num_samples=10, device="cpu"):
     x = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
     x = torch.tensor(x, dtype=torch.int64, device=device).repeat(num_samples, 1)
 
+    model.module.reset()
     for _ in range(500):
         logits = model(x)
         logits = logits[:, -1, :]
@@ -23,8 +24,8 @@ def main(prompt="hello world", num_samples=10, device="cpu"):
         # pred (bsz, 1)
         x = torch.concat((x, idx_next), dim=-1)
 
-    sentence = tokenizer.batch_decode(x.squeeze())
-    for s in sentence:
+    for sample in x:
+        sentence = tokenizer.batch_decode(sample)
         print(' '.join(sentence))
 
 

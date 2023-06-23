@@ -30,7 +30,8 @@ class TransformerXL(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 device="cuda"
+                 device="cuda",
+                 **kwargs
                  ):
 
         super(TransformerXL, self).__init__()
@@ -41,7 +42,8 @@ class TransformerXL(nn.Module):
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
                                               d_model=d_model,
-                                              max_len=max_len)
+                                              max_len=max_len,
+                                              device=device)
 
         self.layers = nn.ModuleList([XLAttentionLayer(d_model=d_model,
                                                       ffn_hidden=4 * d_model,
@@ -60,7 +62,7 @@ class TransformerXL(nn.Module):
     def get_state(self):
         return self.state
 
-    def forward(self, ids):
+    def forward(self, ids, is_causal):
         """
         Computes transformer xl output
         Layer takes in (length, batch_size, d_model) so transpose before and after layers
@@ -84,7 +86,7 @@ class TransformerXL(nn.Module):
         next_state = []
         for layer, s in zip(self.layers, self.state):
             next_state.append(x.detach())
-            x = layer(x, s)
+            x = layer(x, s, is_causal=is_causal)
 
         self.state = torch.stack(next_state)
 
@@ -131,13 +133,13 @@ class TransformerXL(nn.Module):
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
-                        self.layers[layer_num].ffn.ff[1].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[0].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("intermediate.dense.bias"):
-                        self.layers[layer_num].ffn.ff[1].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[0].bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.weight") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[2].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.bias") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[2].bias = nn.Parameter(state_dict[x].detach())
 
                     # layer norms
                     if x.endswith("attention.output.LayerNorm.weight"):

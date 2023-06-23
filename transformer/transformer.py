@@ -121,13 +121,13 @@ class Transformer(nn.Module):
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
-                        self.layers[layer_num].ffn.ff[1].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[0].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("intermediate.dense.bias"):
-                        self.layers[layer_num].ffn.ff[1].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[0].bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.weight") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[2].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.bias") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[2].bias = nn.Parameter(state_dict[x].detach())
 
                     # layer norms
                     if x.endswith("attention.output.LayerNorm.weight"):

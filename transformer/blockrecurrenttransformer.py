@@ -81,7 +81,7 @@ class BlockRecurrentTransformer(nn.Module):
     def get_state(self):
         return self.state, self.xlmems
 
-    def forward(self, ids):
+    def forward(self, ids, is_causal):
         x = self.embedding(ids)
 
         bsz, seqlen, dim = x.shape
@@ -98,13 +98,13 @@ class BlockRecurrentTransformer(nn.Module):
 
             for layer in self.layers1:
                 nextxlmems.append(x.detach())
-                x = layer(x, next(self.xlmems, None))
+                x = layer(x, next(self.xlmems, None), is_causal=is_causal)
 
-            x, self.state = self.recurrent(x, self.state)
+            x, self.state = self.recurrent(x, self.state, is_causal=is_causal)
 
             for layer in self.layers2:
                 nextxlmems.append(x.detach())
-                x = layer(x, next(self.xlmems, None))
+                x = layer(x, next(self.xlmems, None), is_causal=is_causal)
 
             out.append(x)
             self.xlmems = nextxlmems
