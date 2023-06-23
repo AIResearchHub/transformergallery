@@ -29,16 +29,13 @@ While this idea takes the word's position relative to the whole sequence into ac
 
 The trick is to not avoid assigning each position a number, but instead use a fixed length vector that we can gaurentee will be different in different positions.  The following is an algorithm that returns different vectors given a different position without creating the same vector twice:
 
-To create a positional vector of dimention $d \in \mathbb{R}^d$ for position $pos$ in the sequence, for $i$ s.t. $0 \leq i < d$
+To create a positional vector of dimention $d$ for position $pos$ in our sequence (which we will denote as $p_{pos} \in \mathbb{R}^d$), for $i$ s.t. $0 \leq i < d/2$:
 
-$$\text{if $i$ is even: } P(pos, 2i) = \text{sin}(\frac{pos}{n^{2i/d}})$$
-$$\text{if $i$ is odd: } P(pos, 2i+1) = \text{cos}(\frac{pos}{n^{2i/d}})$$
+$$ (p_{pos})^{(2i)} = \text{sin}(\frac{pos}{n^{2i/d}}) \text{ and } (p_{pos})^{(2i+1)} = \text{cos}(\frac{pos}{n^{2i/d}})$$
 
 Where:
-- $pos \in \mathbb{Z} \text{ s.t. } 0 \leq k < L/2$ for sequence length $L$
-- $d$ is the dimention of the word embedding
-- $n$ is a pre-determined scalar; conventionally, n = 10,000
-- $i$ is an indexing variable $0 \leq i < d/2
+- $(p_{pos})^{(k)} \in \mathbb{R}$ denotes the scalar corresponding $k$th dimention of $p_{pos}$ (or the $k$th element in the $p_{pos}$ array to use CS verbiage)
+- $n$ is some predetermined number; the original transformer authors set it to $n=10000$
 
 What this function does is it creates a vector with dimention d that is unique to each $pos$.  For every $pos$, we iterate thorugh $i$ (which, based on the way P is defined, )
 
