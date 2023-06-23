@@ -37,7 +37,9 @@ Where:
 - $(p_{pos})^{(k)} \in \mathbb{R}$ denotes the scalar corresponding $k$th dimention of $p_{pos}$ (or the $k$ th element in the $p_{pos}$ array to use CS verbiage)
 - $n$ is some predetermined number; the original transformer authors set it to $n=10000$
 
-Let's think about how is happening for a bit.  We are creating a vector for the arbitrary position $pos$ of our sequence, which we are calling $p_{pos}$.  The values of $p_{pos}$ will be defined two at a time with index variable $i$ (we set $0 \leq i < d/2$ , where $d$ is the dimention or length of $p_{pos}$, so that we stay in the bounds of $p_{pos}$ since one $i$ will define two values of $p_{pos}$ at a time).
+Let's think about how is happening for a bit.  We are creating a vector for the arbitrary position $pos$ of our sequence, which we are calling $p_{pos}$.  The values of $p_{pos}$ will be defined two at a time with index variable $i$ (we bound i < d/2$ , where $d$ is the dimention or length of $p_{pos}$, so that we stay in the bounds of $p_{pos}$ since one $i$ will define two values of $p_{pos}$ at a time).
+
+Getting to the actual formula of $(p_{pos})^{(k)}$ (where $0 \leq k < d$), what we are essentially doing is creating two special sinusidal functions (one is a sine function for $k$ even, the other is a cosine funciton for $k$ odd) that are unique to the position $pos$ becasue of the $pos$ in the denominator.
 
 ## Encoder
 
