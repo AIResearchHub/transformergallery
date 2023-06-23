@@ -5,6 +5,21 @@ import torch.nn.functional as F
 from transformers import BertTokenizerFast
 
 
+def join(strings):
+    output = ""
+    for string in strings:
+        if string[:2] == "##":
+            output += string[2:]
+        elif string == "i" or string == "a":
+            output += ' ' + string
+        elif len(string) == 1:
+            output += string
+        else:
+            output += ' ' + string
+
+    return output
+
+
 def main(prompt="once upon a time", num_samples=10, device="cuda"):
     model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
@@ -25,8 +40,9 @@ def main(prompt="once upon a time", num_samples=10, device="cuda"):
         x = torch.concat((x, idx_next), dim=-1)
 
     for sample in x:
+        print("=================================================================================")
         sentence = tokenizer.batch_decode(sample)
-        print(' '.join(sentence))
+        print(join(sentence))
 
 
 if __name__ == "__main__":
