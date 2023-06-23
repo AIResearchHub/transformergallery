@@ -47,7 +47,8 @@ In the end, we add these positional vectors to our preexisting word embeddings s
 
 ** Questions to answer: why does it alternate functinos for even/odd?  How does the model significance of the positional vectors (how does it know what position a word is in if it just receives a vector with no indication of how much of that vector was influenced by the positional encoding); does it just learn them in traning? **
 
-
+Now, we should understand the motivation and technique behding this part of the graph:
+<img width="514" alt="Screen Shot 2023-06-23 at 5 13 04 PM" src="https://github.com/ArjunSohur/transformergallery/assets/105809809/4c422c71-57cb-4f05-a8b7-55c9d44360ae">
 
 ## Encoder
 
