@@ -27,14 +27,20 @@ Ok, then, what if we normalize that positional encoding score so that for a sequ
 
 While this idea takes the word's position relative to the whole sequence into account, it starts getting hairy when you assign .2 to the 1st word of a sequence of 5 and the 50th word of a 250 word long sequence.
 
-Let's look at how the original transformer does it, then we will see why this choice of positional encoding makes the most sense.
-$$\text{If position $k$ is even: } P(k, 2i) = \text{sin}(\frac{k}{n^{2i/d}})$$
-$$\text{If position $k$ is odd: } P(k, 2i+1) = \text{cos}(\frac{k}{n^{2i/d}})$$
+The trick is to not avoid assigning each position a number, but instead use a fixed length vector that we can gaurentee will be different in different positions.  The following is an algorithm that returns different vectors given a different position without creating the same vector twice:
+
+To create a positional vector of dimention $d \in \mathbb{R}^d$ for position $pos$ in the sequence, for $i$ s.t. $0 \leq i < d$
+
+$$\text{if $i$ is even: } P(pos, 2i) = \text{sin}(\frac{pos}{n^{2i/d}})$$
+$$\text{if $i$ is odd: } P(pos, 2i+1) = \text{cos}(\frac{pos}{n^{2i/d}})$$
+
 Where:
-- $k \in \mathbb{Z} \text{ s.t. } 0 \leq k \leq L/2$ for sequence length $L$
+- $pos \in \mathbb{Z} \text{ s.t. } 0 \leq k < L/2$ for sequence length $L$
 - $d$ is the dimention of the word embedding
 - $n$ is a pre-determined scalar; conventionally, n = 10,000
-- $i$ is for FIGURE IT OUT
+- $i$ is an indexing variable $0 \leq i < d/2
+
+What this function does is it creates a vector with dimention d that is unique to each $pos$.  For every $pos$, we iterate thorugh $i$ (which, based on the way P is defined, )
 
 ## Encoder
 
@@ -44,6 +50,7 @@ Where:
 https://machinelearningmastery.com/the-transformer-model/
 https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/#:~:text=What%20Is%20Positional%20Encoding%3F,item's%20position%20in%20transformer%20models.
 https://medium.datadriveninvestor.com/transformer-break-down-positional-encoding-c8d1bbbf79a8
+https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
 
 
 
