@@ -70,7 +70,7 @@ class BertTrainer:
                       f"Loss: {loss} \t "
                       f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
-            if i % 10000 == 0:
+            if i % 1000 == 0:
                 torch.save(self.model, "saved/final")
 
     def step(self, batch):

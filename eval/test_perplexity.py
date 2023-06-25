@@ -1,22 +1,30 @@
 
 
 import torch
-import torch.nn.functional as F
+from torcheval.metrics.text import Perplexity
 
 
-def test_loss(model, dataloader):
+def test_perplexity(model, dataloader, device):
+    """
+    Args:
+        model:
+        dataloader:
+
+    Returns:
+
+    """
+    metric = Perplexity(device=device)
+
     for i, batch in enumerate(dataloader):
         bsz, timesteps, seqlen = batch.shape
         inputs, targets = batch[:, :, :-1], batch[:, :, 1:]
-
-        total_loss = 0
 
         with torch.no_grad():
             model.module.reset()
             for t in range(timesteps):
                 expected = model(inputs[:, t, :])
-                loss = F.nll_loss(expected.transpose(1, 2), targets[:, t, :])
-                total_loss += loss.item()
+                metric.update(expected, targets[:, t, :])
 
-        print(total_loss / (timesteps * seqlen * bsz))
+    ppl = metric.compute()
+    print(ppl.item())
 

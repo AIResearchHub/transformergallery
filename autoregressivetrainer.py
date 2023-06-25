@@ -2,10 +2,12 @@
 
 import torch
 import torch.nn as nn
-from torch.optim import Adam
+from torch.optim import Adam, AdamW
 
 import time
+import datetime
 
+from sophia import SophiaG
 from optim_schedule import ScheduledOptim
 
 
@@ -26,7 +28,8 @@ class AutoregressiveTrainer:
         self.model = nn.DataParallel(model)
         if device == "cuda":
             self.model = self.model.cuda()
-        self.opt = Adam(self.model.parameters(), lr=lr)
+        self.opt = AdamW(self.model.parameters(), lr=lr)
+        # self.opt = SophiaG(self.model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=0)
         self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)
 
         self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
@@ -39,7 +42,8 @@ class AutoregressiveTrainer:
         self.rollout = rollout
         self.length = burnin + rollout
 
-        self.log = open(f"logs/lm", "w")
+        self.dt = f"{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')}.txt"
+        self.log = open(f"logs/{self.dt}", "w")
         self.start = time.time()
         self.updates = 0
 
@@ -81,9 +85,9 @@ class AutoregressiveTrainer:
 
         self.model.module.reset()
         for t in range(self.rollout):
+            self.opt.zero_grad()
             expected = self.model(inputs[:, t, :])
             loss = self.cross_entropy_loss(expected, targets[:, t, :])
-            self.opt.zero_grad()
             loss.backward()
 
             total_loss += loss.item()
