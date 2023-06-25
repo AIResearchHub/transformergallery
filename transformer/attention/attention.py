@@ -1,5 +1,6 @@
 
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -39,7 +40,16 @@ class Attention(nn.Module):
         # q, k, v = self.w_q(q), *self.w_kv(kv).chunk(2, dim=-1)
         # q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
+        # q = q.to(torch.float16)
+        # k = k.to(torch.float16)
+        # v = v.to(torch.float16)
+
+        # with torch.backends.cuda.sdp_kernel(
+        #         enable_flash=True
+        # ):
         out = F.scaled_dot_product_attention(q, k, v, attn_mask=mask, is_causal=is_causal)
+
+        # out = out.to(torch.float32)
 
         out = self.concat(out)
         out = self.w_concat(out)

@@ -60,6 +60,7 @@ class Transformer(nn.Module):
     def get_state(self):
         return self.state
 
+    # @torch.autocast("cuda", dtype=torch.float16)
     def forward(self, ids, is_causal):
         """
         Computes transformer output

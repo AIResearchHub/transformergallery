@@ -24,7 +24,7 @@ def main(seq_len=512,
          ):
 
     lm = AutoregressiveLM(
-        cls=TransformerXL,
+        cls=BlockRecurrentTransformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -32,7 +32,7 @@ def main(seq_len=512,
         n_head=n_head,
         p=p,
         device=device,
-        w=512,
+        w=256,
         bsz=batch_size,
         topk=1,
     )
@@ -41,7 +41,7 @@ def main(seq_len=512,
     dataloader = DataLoader(
         PG19Dataset(
             cache_dir=cache_dir,
-            split="train[:5000]",
+            split="train[:5]",
             seq_len=seq_len + 1,
             block_len=rollout,
             device=device

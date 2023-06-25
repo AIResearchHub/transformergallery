@@ -33,6 +33,7 @@ class BlockRecurrentTransformer(nn.Module):
                  w=512,
                  device="cuda",
                  statelen=32,
+                 **kwargs
                  ):
         super(BlockRecurrentTransformer, self).__init__()
         self.n_layers = n_layers
@@ -64,7 +65,7 @@ class BlockRecurrentTransformer(nn.Module):
                                                        n_head=n_head,
                                                        p=p
                                                        )
-                                      for _ in range(n_layers - n_layers // 2)])
+                                      for _ in range(n_layers - (n_layers // 2))])
 
         self.reset()
 
@@ -81,6 +82,7 @@ class BlockRecurrentTransformer(nn.Module):
     def get_state(self):
         return self.state, self.xlmems
 
+    # @torch.autocast("cuda", dtype=torch.float16)
     def forward(self, ids, is_causal):
         x = self.embedding(ids)
 
@@ -101,6 +103,7 @@ class BlockRecurrentTransformer(nn.Module):
                 x = layer(x, next(self.xlmems, None), is_causal=is_causal)
 
             x, self.state = self.recurrent(x, self.state, is_causal=is_causal)
+            # x = self.recurrent(x, is_causal=is_causal)
 
             for layer in self.layers2:
                 nextxlmems.append(x.detach())
@@ -112,6 +115,7 @@ class BlockRecurrentTransformer(nn.Module):
         out = torch.concat(out, dim=1)
         assert out.shape == (bsz, seqlen, dim)
 
+        self.state = self.state.detach()
         return out
 
     def load_pretrained(self):
@@ -137,78 +141,78 @@ class BlockRecurrentTransformer(nn.Module):
                 if layer_num < self.n_layers // 2:
                     # attention
                     if x.endswith("attention.self.query.weight"):
-                        self.layers[layer_num].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.query.bias"):
-                        self.layers[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.weight"):
-                        self.layers[layer_num].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.bias"):
-                        self.layers[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.weight"):
-                        self.layers[layer_num].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.bias"):
-                        self.layers[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.weight"):
-                        self.layers[layer_num].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
-                        self.layers[layer_num].ffn.ff[1].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].ffn.ff[0].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("intermediate.dense.bias"):
-                        self.layers[layer_num].ffn.ff[1].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].ffn.ff[0].bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.weight") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].ffn.ff[2].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.bias") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].ffn.ff[2].bias = nn.Parameter(state_dict[x].detach())
 
                     # layer norms
                     if x.endswith("attention.output.LayerNorm.weight"):
-                        self.layers[layer_num].norm1.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].norm1.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.LayerNorm.bias"):
-                        self.layers[layer_num].norm1.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].norm1.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.LayerNorm.weight") and not x.endswith("attention.output.LayerNorm.weight"):
-                        self.layers[layer_num].norm2.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].norm2.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.LayerNorm.bias") and not x.endswith("attention.output.LayerNorm.bias"):
-                        self.layers[layer_num].norm2.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].norm2.bias = nn.Parameter(state_dict[x].detach())
 
                 elif layer_num < self.n_layers:
                     # attention
                     if x.endswith("attention.self.query.weight"):
-                        self.layers[layer_num].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.query.bias"):
-                        self.layers[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.weight"):
-                        self.layers[layer_num].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.bias"):
-                        self.layers[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.weight"):
-                        self.layers[layer_num].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.bias"):
-                        self.layers[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.weight"):
-                        self.layers[layer_num].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
-                        self.layers[layer_num].ffn.ff[1].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].ffn.ff[0].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("intermediate.dense.bias"):
-                        self.layers[layer_num].ffn.ff[1].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].ffn.ff[0].bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.weight") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].ffn.ff[2].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.bias") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[3].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].ffn.ff[2].bias = nn.Parameter(state_dict[x].detach())
 
                     # layer norms
                     if x.endswith("attention.output.LayerNorm.weight"):
-                        self.layers[layer_num].norm1.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].norm1.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.LayerNorm.bias"):
-                        self.layers[layer_num].norm1.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].norm1.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.LayerNorm.weight") and not x.endswith("attention.output.LayerNorm.weight"):
-                        self.layers[layer_num].norm2.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].norm2.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.LayerNorm.bias") and not x.endswith("attention.output.LayerNorm.bias"):
-                        self.layers[layer_num].norm2.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].norm2.bias = nn.Parameter(state_dict[x].detach())
 

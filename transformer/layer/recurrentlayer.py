@@ -23,10 +23,10 @@ class RecurrentLayer(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=p)
 
-    def forward(self, x, state, src_mask=None):
+    def forward(self, x, state, src_mask=None, is_causal=False):
         """Compute the output of the transformer layer"""
         _x = x
-        x, state = self.attention(qx=x, kvx=x, qs=state, kvs=state, mask=src_mask)
+        x, state = self.attention(qx=x, kvx=x, qs=state, kvs=state, mask=src_mask, is_causal=is_causal)
 
         x = self.norm1(x + _x)
         x = self.dropout1(x)
