@@ -53,6 +53,13 @@ Now, we should understand the motivation and technique behding this part of the 
 ** Maybe label the graph a little; how would people know that the arrowws going into the plus represent? **
 
 ## Encoder
+After positional encoding, we move on to understanding the encoder.  
+
+To understand the encoder - and decoder, for that matter, - you must understant multihead attention.  If you are unfamilar with the concept of multihead attention, or need to polish your memory, we have a comprehensive guide to attention in this gallery.  Furthermore, we provide resources that were helpful in our own learning process.
+
+The good news is that once you understand multihead attention, the encoder starts to feel less daunting.
+
+After doing positional encoding, we get an input that is 
 
 ## Decoder
 
@@ -61,7 +68,8 @@ https://machinelearningmastery.com/the-transformer-model/
 https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1/#:~:text=What%20Is%20Positional%20Encoding%3F,item's%20position%20in%20transformer%20models.
 https://medium.datadriveninvestor.com/transformer-break-down-positional-encoding-c8d1bbbf79a8
 https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
-
+https://www.turing.com/kb/brief-introduction-to-transformers-and-their-power#the-transformer-encoder
+https://data-science-blog.com/blog/2021/04/07/multi-head-attention-mechanism/
 
 
 
