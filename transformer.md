@@ -59,7 +59,7 @@ To understand the encoder - and decoder, for that matter, - you must understant 
 
 The good news is that once you understand multihead attention, the encoder starts to feel less daunting.
 
-After doing positional encoding, we get an input that is 
+After doing positional encoding, we get an input that is  
 
 ## Decoder
 
