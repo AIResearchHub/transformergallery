@@ -110,7 +110,7 @@ What we've just done is map out how important each key (column) is to each query
 Let's start with the first step and build up to getting a self-attention matrix.
 
 
-Machines speak numbers, so we need to take our words and put them into vector form.  MORE NEEDED  Thankfully, there are plenty of pre-trained algorithms like GloVe or Word2Vec that can do this "embedding" for us.  
+Machines speak numbers, so we need to take our words and put them into a vector form. Thankfully, there are plenty of pre-trained algorithms like GloVe or Word2Vec that can do this "embedding" for us.  
 
 Generalizing a bit, let's say that we have n number of words in our input sentence, and our word-to-vector algorithm returns a vector of d dimensions for each word.  After vectorizing, then, we'd have a matrix $X \in \mathbb{R}^{n \times d}$ that represents the input in numerical form where each row of $X$ is a word of the input.
 
