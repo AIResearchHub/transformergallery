@@ -1,7 +1,9 @@
 
 
+import torch
 from torch.utils.data import Dataset
 from datasets import load_dataset
+
 import random
 import time
 
@@ -35,16 +37,48 @@ class PG19Dataset(Dataset):
 
         self.size = sum([x.size(0) for x in self.data]) // block_len
 
+    def add_sep_padding(self, data, w, seq_len=512, p=0.2, sep_token=102):
+        """
+        Args:
+            data (List[Tensor]): List of tensors
+        """
+        assert seq_len % w == 0
+        assert seq_len // w > 1
+
+        padded = []
+        for x in data:
+            ans = []
+            x = x.view(-1, w)
+            for window in x:
+                ans.append(window)
+
+                if random.random() < p:
+                    length = random.randrange(1, seq_len // w)
+                    for _ in range(length):
+                        ans.append(torch.full((w,), sep_token))
+
+            while (len(ans) * w) % seq_len != 0:
+                ans.append(torch.full((w,), sep_token))
+
+            padded.append(torch.stack(ans).view(-1, seq_len))
+
+        return padded
+
     def __getitem__(self, index):
         """
         Index is not used
 
         Returns:
-            output (Tensor): Tensor with shape (block_len, seq_len)
+            output (Tensor): Tensor with shape (block_len, seq_len+1)
         """
         bidx = random.randrange(0, len(self.data))
-        tidx = random.randrange(0, self.data[bidx].size(0) - self.block_len + 1)
+        tidx = random.randrange(0, self.data[bidx].size(0) - self.block_len)  # + 1)
+
+        last_token = self.data[bidx][tidx:tidx+self.block_len+1][0].long()
         data = self.data[bidx][tidx:tidx+self.block_len].long()
+        data = torch.concat([data, last_token], axis=-1)
+        assert data.shape == (self.block_len, self.seq_len+1)
+
         return data.to(self.device)
 
     def __len__(self):

@@ -32,7 +32,7 @@ def main(seq_len=512,
         n_head=n_head,
         p=p,
         device=device,
-        w=256,
+        w=128,
         bsz=batch_size,
         topk=1,
     )
@@ -42,7 +42,7 @@ def main(seq_len=512,
         PG19Dataset(
             cache_dir=cache_dir,
             split="train[:5]",
-            seq_len=seq_len + 1,
+            seq_len=seq_len,
             block_len=rollout,
             device=device
         ),
