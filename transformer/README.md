@@ -37,7 +37,7 @@ Where:
 - $(p_{pos})^{(k)} \in \mathbb{R}$ denotes the scalar corresponding $k$th dimention of $p_{pos}$ (or the $k$ th element in the $p_{pos}$ array to use CS verbiage)
 - $n$ is some predetermined number; the original transformer authors set it to $n=10000$
 
-Let's think about how is happening for a bit.  We are creating a vector for the arbitrary position $pos$ of our sequence, which we are calling $p_{pos}$.  The values of $p_{pos}$ will be defined two at a time with index variable $i$ (we bound i < d/2$ , where $d$ is the dimention or length of $p_{pos}$, so that we stay in the bounds of $p_{pos}$ since one $i$ will define two values of $p_{pos}$ at a time).
+Let's think about how is happening for a bit.  We are creating a vector for the arbitrary position $pos$ of our sequence, which we are calling $p_{pos}$.  The values of $p_{pos}$ will be defined two at a time with index variable $i$ (we bound $i < d/2$ , where $d$ is the dimention or length of $p_{pos}$, so that we stay in the bounds of $p_{pos}$ since one $i$ will define two values of $p_{pos}$ at a time).
 
 It is important to see how our formula produces entirely different vectors of dimention $d$ for every position.  The trick lies in the behavior of the sinusidal functions and the clever way the formula was set up.  Without launching into a trigonometry lesson, putting $pos$ in the numerator of the angle of the sinusidal function (along with the rest of the formula) guarentees that no two position's formula's are the same.  If you want to play with the variables of the formula, a well as get a better intrinsic understanding as to why the last statement is true, check out this graph:
 
