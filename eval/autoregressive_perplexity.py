@@ -26,5 +26,5 @@ def test_perplexity(model, dataloader, device):
                 metric.update(expected, targets[:, t, :])
 
     ppl = metric.compute()
-    print(ppl.item())
+    return ppl.item()
 

@@ -15,7 +15,7 @@ def main(seq_len=512,
          n_head=8,
          p=0.1,
          lr=4e-5,
-         batch_size=16,
+         batch_size=32,
          burnin=0,
          rollout=5,
          warmup_steps=100,
@@ -24,7 +24,7 @@ def main(seq_len=512,
          ):
 
     lm = AutoregressiveLM(
-        cls=BlockRecurrentTransformer,
+        cls=BlockFeedbackTransformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -44,7 +44,8 @@ def main(seq_len=512,
             split="train[:5]",
             seq_len=seq_len,
             block_len=rollout,
-            device=device
+            device=device,
+            sep_padding=True
         ),
         batch_size=batch_size,
     )

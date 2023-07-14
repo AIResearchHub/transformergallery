@@ -21,7 +21,7 @@ def join(strings):
 
 
 def main(prompt="once upon a time", num_samples=10, device="cuda"):
-    model = torch.load("saved/final").to(device)
+    model = torch.load("saved/recsep200000ppl60").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     # (bsz, seqlen)
