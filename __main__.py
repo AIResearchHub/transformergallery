@@ -48,8 +48,9 @@ def main(seq_len=512,
 
     dataloader = DataLoader(
         PG19Dataset(
+            name="scientific_papers",
             cache_dir=cache_dir,
-            split="train[:5]",
+            split="train[:20000]",
             seq_len=seq_len,
             block_len=rollout,
             device=device,
@@ -69,6 +70,7 @@ def main(seq_len=512,
         warmup_steps=warmup_steps,
         device=device
     )
+    print("Starting training run...")
 
     epochs = 1000
     for epoch in range(epochs):

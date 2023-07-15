@@ -3,7 +3,13 @@ import torch
 from torcheval.metrics.text import Perplexity
 
 
-def test_perplexity_sep(model, dataloader, device, sep_token=102, vocab_size=30522):
+def test_perplexity_sep(model,
+                        dataloader,
+                        device,
+                        sep_token=102,
+                        start_token=50,
+                        end_token=51,
+                        vocab_size=30522):
     """
     Args:
     model:
@@ -31,8 +37,8 @@ def test_perplexity_sep(model, dataloader, device, sep_token=102, vocab_size=305
                 targets_ = targets[:, t, :].reshape(-1)
 
                 mask = (inputs[:, t, :].reshape(-1) != sep_token) & \
-                       (inputs[:, t, :].reshape(-1) != 50) & \
-                       (inputs[:, t, :].reshape(-1) != 51)
+                       (inputs[:, t, :].reshape(-1) != start_token) & \
+                       (inputs[:, t, :].reshape(-1) != end_token)
 
                 assert targets_.shape == (bsz * seqlen,)
                 assert expected.shape == (bsz * seqlen, vocab_size)

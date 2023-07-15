@@ -14,6 +14,7 @@ def main(cache_dir="/media/yh04/New Volume/datasets",
 
     dataloader = DataLoader(
         PG19Dataset(
+            name="scientific_papers",
             cache_dir=cache_dir,
             split="validation",
             seq_len=512,
@@ -24,11 +25,23 @@ def main(cache_dir="/media/yh04/New Volume/datasets",
         batch_size=8,
     )
 
-    # loss = test_loss(model, dataloader)
-    # loss = test_memory(model, dataloader)
-    loss = test_perplexity_sep(model, dataloader, device)
-    # loss = test_perplexity(model, dataloader, device)
-    print(loss)
+    ppl = test_perplexity_sep(model, dataloader, device)
+    print("No [SEP] Perplexity: ", ppl)
+
+    dataloader = DataLoader(
+        PG19Dataset(
+            name="scientific_papers",
+            cache_dir=cache_dir,
+            split="validation",
+            seq_len=512,
+            block_len=5,
+            device=device,
+            sep_padding=True,
+        ),
+        batch_size=8,
+    )
+    ppl = test_perplexity_sep(model, dataloader, device)
+    print("[SEP] Perplexity: ", ppl)
 
 
 if __name__ == "__main__":

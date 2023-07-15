@@ -20,13 +20,21 @@ class PG19Dataset(Dataset):
         device (string): cuda / cpu
     """
 
-    def __init__(self, cache_dir, split, seq_len, block_len, device, sep_padding):
+    def __init__(self, name, cache_dir, split, seq_len, block_len, device, sep_padding):
         super().__init__()
-        #  List[(total_len, seq_len)]
-        self.data = load_dataset("pg19", split=split, cache_dir=cache_dir)
+
+        if name == "pg19":
+            self.data = load_dataset("pg19", split=split, cache_dir=cache_dir)
+            key = "text"
+        elif name == "scientific_papers":
+            self.data = load_dataset("scientific_papers", "arxiv", split=split, cache_dir=cache_dir)
+            key = "article"
+
         print("Dataset loaded")
+        #  List[(total_len, seq_len)]
         start = time.time()
-        self.data = filter_empty(partition(tokenize([data["text"] for data in self.data]),
+
+        self.data = filter_empty(partition(tokenize([data[key] for data in self.data]),
                                            max_len=seq_len),
                                  min_len=block_len + 1)
         print("Dataset tokenized and partitioned in ", time.time() - start)
@@ -35,10 +43,10 @@ class PG19Dataset(Dataset):
         self.block_len = block_len
         self.device = device
 
-        self.size = sum([x.size(0) for x in self.data]) // block_len
-
         if sep_padding:
             self.data = self.add_sep_padding(self.data, w=128)
+
+        self.size = sum([x.size(0) for x in self.data]) // block_len
 
     def add_sep_padding(self, data, w, seq_len=512, p=0.1, sep_token=102):
         """
