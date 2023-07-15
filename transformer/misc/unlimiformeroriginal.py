@@ -364,7 +364,7 @@ class UnlimiformerOriginal(Generic[ModelType]):
         (context_start_ind, context_end_ind, update_start_ind, update_end_ind)
         then each chunk is encoded by the encoder, the encoder output and
         the attention mask are recorded and concatenated
-        the final output is (batch, source_len, dim) of encoder outputs
+        the recsep200000ppl60 output is (batch, source_len, dim) of encoder outputs
         """
         long_inputs_encoded = []
         long_inputs_mask = []

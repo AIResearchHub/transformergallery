@@ -15,7 +15,11 @@ def main(seq_len=512,
          n_head=8,
          p=0.1,
          lr=4e-5,
+<<<<<<< HEAD
          batch_size=1,
+=======
+         batch_size=32,
+>>>>>>> 1ba738d04ed87b7eac9464e401bf073de49c3f02
          burnin=0,
          rollout=5,
          warmup_steps=100,
@@ -24,7 +28,11 @@ def main(seq_len=512,
          ):
 
     lm = AutoregressiveLM(
+<<<<<<< HEAD
         cls=RecurrentMemoryTransformer,
+=======
+        cls=BlockFeedbackTransformer,
+>>>>>>> 1ba738d04ed87b7eac9464e401bf073de49c3f02
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -44,7 +52,8 @@ def main(seq_len=512,
             split="train[:5]",
             seq_len=seq_len,
             block_len=rollout,
-            device=device
+            device=device,
+            sep_padding=True
         ),
         batch_size=batch_size,
     )

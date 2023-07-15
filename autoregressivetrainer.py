@@ -73,7 +73,7 @@ class AutoregressiveTrainer:
 
             if i % 1000 == 0:
                 self.model.module.reset()
-                torch.save(self.model, "saved/final")
+                torch.save(self.model, "saved/recsep200000ppl60")
 
     def step(self, batch):
         """
