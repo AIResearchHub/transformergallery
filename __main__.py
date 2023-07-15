@@ -15,16 +15,16 @@ def main(seq_len=512,
          n_head=8,
          p=0.1,
          lr=4e-5,
-         batch_size=16,
+         batch_size=1,
          burnin=0,
          rollout=5,
          warmup_steps=100,
-         device="cuda",
+         device="cpu",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 
     lm = AutoregressiveLM(
-        cls=BlockRecurrentTransformer,
+        cls=RecurrentMemoryTransformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,

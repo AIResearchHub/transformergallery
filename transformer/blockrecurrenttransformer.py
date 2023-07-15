@@ -30,8 +30,8 @@ class BlockRecurrentTransformer(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 w=512,
                  device="cuda",
+                 w=512,
                  statelen=32,
                  **kwargs
                  ):
