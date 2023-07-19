@@ -71,7 +71,7 @@ class BertTrainer:
                       f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
             if i % 1000 == 0:
-                torch.save(self.model, "saved/recsep200000ppl60")
+                torch.save(self.model, "saved/arxivrecsep120000ppl23")
 
     def step(self, batch):
         """

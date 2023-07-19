@@ -10,7 +10,7 @@ import time
 from utils import *
 
 
-class PG19Dataset(Dataset):
+class TextDataset(Dataset):
     """
     Parameters:
         cache_dir (string): The directory to cache the transformer datasets and where to retrieve them
@@ -20,7 +20,15 @@ class PG19Dataset(Dataset):
         device (string): cuda / cpu
     """
 
-    def __init__(self, name, cache_dir, split, seq_len, block_len, device, sep_padding):
+    def __init__(self,
+                 name,
+                 cache_dir,
+                 split,
+                 seq_len,
+                 block_len,
+                 device="cuda",
+                 sep_padding=False,
+                 max_len=None):
         super().__init__()
 
         if name == "pg19":
@@ -45,6 +53,9 @@ class PG19Dataset(Dataset):
 
         if sep_padding:
             self.data = self.add_sep_padding(self.data, w=128)
+
+        if max_len is not None:
+            self.data = [x[:max_len] for x in self.data]
 
         self.size = sum([x.size(0) for x in self.data]) // block_len
 

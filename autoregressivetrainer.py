@@ -7,7 +7,6 @@ from torch.optim import Adam, AdamW
 import time
 import datetime
 
-from sophia import SophiaG
 from optim_schedule import ScheduledOptim
 
 
@@ -73,7 +72,7 @@ class AutoregressiveTrainer:
 
             if i % 1000 == 0:
                 self.model.module.reset()
-                torch.save(self.model, "saved/recsep200000ppl60")
+                torch.save(self.model, "saved/arxivrecsep120000ppl23")
 
     def step(self, batch):
         """

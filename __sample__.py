@@ -21,7 +21,7 @@ def join(strings):
 
 
 def main(prompt="therefore, the equation can be written as", num_samples=1, device="cuda"):
-    model = torch.load("saved/recsep200000ppl60").to(device)
+    model = torch.load("saved/arxivrecsep120000ppl23").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     # (bsz, seqlen)

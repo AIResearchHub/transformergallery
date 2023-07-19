@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from einops import rearrange
 
-from .layer import TransformerEmbedding, AttentionLayer
+from .layer import TransformerEmbedding, XLAttentionLayer
 
 
 class RecurrentMemoryTransformer(nn.Module):
@@ -53,61 +53,78 @@ class RecurrentMemoryTransformer(nn.Module):
                                               max_len=max_len,
                                               device=device)
 
-        self.layers = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                    ffn_hidden=4 * d_model,
-                                                    n_head=n_head,
-                                                    p=p)
+        self.layers = nn.ModuleList([XLAttentionLayer(d_model=d_model,
+                                                      ffn_hidden=4 * d_model,
+                                                      n_head=n_head,
+                                                      p=p)
                                     for _ in range(n_layers)])
 
         self.reset()
 
         # learnable init mem tokens
-        self.init_mem = nn.Parameter(torch.randn(mem_tokens, d_model))
+        self.init_mem = nn.Parameter(torch.randn(d_model,))
 
         # custom mask
         self.custom_mask = self.create_custom_mask()
 
-    def create_custom_mask(self):
-        causal_mask = torch.ones((self.num_tokens, self.num_tokens), device=self.device, dtype=torch.bool).tril()
+    def create_custom_mask(self, num_tokens=None):
+        if num_tokens is None:
+            num_tokens = self.num_tokens
+
+        causal_mask = torch.ones((num_tokens, num_tokens), device=self.device, dtype=torch.bool).tril()
 
         causal_mask = F.pad(causal_mask, (0, self.mem_tokens, self.mem_tokens, 0), value=0)
         causal_mask = F.pad(causal_mask, (self.mem_tokens, 0, 0, self.mem_tokens), value=1)
 
         mask = rearrange(causal_mask, 'i j -> 1 1 i j')
 
-        assert mask.shape == (1, 1, self.w, self.w)
+        assert mask.shape == (1, 1, 2*self.mem_tokens+num_tokens, 2*self.mem_tokens+num_tokens)
         return mask
 
     def reset(self):
         self.mem = None
+        self.state = None
 
-    def set_state(self, mem):
+    def set_state(self, mem, state):
         self.mem = mem
+        self.state = state
 
     def get_state(self):
-        return self.mem
+        return self.mem, self.state
 
-    def forward(self, ids, is_causal=False):
+    def forward(self, ids, mask=None, is_causal=False):
         """
         Computes recurrent memory transformer output
         """
         if is_causal:
+            assert mask is None
             mask = self.custom_mask
 
         x = self.embedding(ids)
         xs = x.split(self.num_tokens, dim=-2)
+
         if self.mem is None:
-            self.mem = self.init_mem.unsqueeze(0)
+            self.mem = self.init_mem.unsqueeze(0).unsqueeze(0).repeat(ids.size(0), self.mem_tokens, 1)
+
+        if self.state is None:
+            self.state = torch.zeros(self.n_layers, ids.size(0), self.w, self.d_model, device=self.device)
 
         out = []
         for x in xs:
-            x = torch.concat([self.mem, x, self.mem], axis=-2)
+            if x.size(1) != self.num_tokens and is_causal:
+                mask = self.create_custom_mask(num_tokens=x.size(1))
 
-            for layer in self.layers:
+            x = torch.concat([self.mem, x, self.mem], axis=1)
+
+            next_state = []
+            for layer, s in zip(self.layers, self.state):
+                next_state.append(x.detach())
                 # modify causal mask to not include mem tokens
-                x = layer(x, mask=mask, is_causal=False)
+                x = layer(x, s, mask=mask, is_causal=False)
 
             self.mem = x[:, -self.mem_tokens:, :]
+            self.state = torch.stack(next_state)
+
             out.append(x[:, self.mem_tokens:-self.mem_tokens, :])
 
         out = torch.concat(out, dim=1)

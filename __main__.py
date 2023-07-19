@@ -5,34 +5,26 @@ from torch.utils.data import DataLoader
 from transformer import *
 from autoregressivetrainer import AutoregressiveTrainer
 from berttrainer import BertTrainer
-from dataset import PG19Dataset
+from dataset import TextDataset
 
 
 def main(seq_len=512,
          vocab_size=30522,
-         n_layers=8,
+         n_layers=4,
          d_model=768,
          n_head=8,
          p=0.1,
          lr=4e-5,
-<<<<<<< HEAD
-         batch_size=1,
-=======
          batch_size=32,
->>>>>>> 1ba738d04ed87b7eac9464e401bf073de49c3f02
          burnin=0,
          rollout=5,
          warmup_steps=100,
-         device="cpu",
+         device="cuda",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 
     lm = AutoregressiveLM(
-<<<<<<< HEAD
         cls=RecurrentMemoryTransformer,
-=======
-        cls=BlockFeedbackTransformer,
->>>>>>> 1ba738d04ed87b7eac9464e401bf073de49c3f02
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -43,11 +35,13 @@ def main(seq_len=512,
         w=128,
         bsz=batch_size,
         topk=1,
+        num_tokens=128,
+        mem_tokens=64,
     )
     lm.load_pretrained()
 
     dataloader = DataLoader(
-        PG19Dataset(
+        TextDataset(
             name="scientific_papers",
             cache_dir=cache_dir,
             split="train[:20000]",
