@@ -5,7 +5,8 @@ logging.getLogger("pytorch_pretrained_bert.tokenization").setLevel(logging.ERROR
 
 import torch
 import os
-
+from torch.nn.utils.rnn import CharTokenizer
+from torchtext.data import get_tokenizer
 
 def read_file(path):
     with open(path, 'r') as f:
@@ -19,8 +20,15 @@ def read_data(folderpath, max_files):
     return [read_file(os.path.join(folderpath, file)) for file in files[:max_files]]
 
 
-def tokenize(texts):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+def tokenize(texts,type):
+    if type == "bert":
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    if type == "char":
+        tokenizer = CharTokenizer()
+    if type == "spacy":
+        tokenizer = get_tokenizer("spacy")
+
+
     return [tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text)) for text in texts]
 
 
