@@ -31,7 +31,7 @@ class BlockFeedbackTransformer(nn.Module):
                  n_head=8,
                  p=0.1,
                  w=512,
-                 device="cuda",
+                 device="cuda:0",
                  statelen=32,
                  **kwargs
                  ):

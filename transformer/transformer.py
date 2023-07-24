@@ -29,7 +29,7 @@ class Transformer(nn.Module):
                  d_model=768,
                  n_head=8,
                  p=0.1,
-                 device="cuda",
+                 device="cuda:0",
                  **kwargs
                  ):
 
@@ -148,7 +148,7 @@ class TransformerHuggingface:
 
         self.model = BertModel.from_pretrained(pretrained)
 
-    def init_state(self, batch_size=1, device="cpu"):
+    def init_state(self, batch_size=1, device="cuda:0"):
         return torch.zeros(1, batch_size, 1, 1, device=device)
 
     def state_forward(self, ids, state):

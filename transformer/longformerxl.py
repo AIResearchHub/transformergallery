@@ -29,7 +29,7 @@ class LongformerXL(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 device="cuda"
+                 device="cuda:0"
                  ):
 
         super(LongformerXL, self).__init__()
