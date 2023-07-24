@@ -19,7 +19,7 @@ def main(seq_len=512,
          burnin=0,
          rollout=5,
          warmup_steps=100,
-         device="cuda",
+         device="cuda:0",
          cache_dir="./cache/datasets"
          ):
 
