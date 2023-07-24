@@ -1,5 +1,4 @@
 
-
 import torch
 import torch.nn as nn
 from torch.optim import Adam, AdamW
@@ -25,8 +24,8 @@ class AutoregressiveTrainer:
                  ):
 
         self.model = nn.DataParallel(model)
-	self.device = torch.device(device)
-	self.model = self.model.to(self.device)
+        self.device = torch.device(device)
+        self.model = self.model.to(self.device)
         self.opt = AdamW(self.model.parameters(), lr=lr)
         # self.opt = SophiaG(self.model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=0)
         self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)
@@ -81,7 +80,7 @@ class AutoregressiveTrainer:
         """
         total_loss = 0
         inputs, targets = batch[:, :, :-1], batch[:, :, 1:]
-	inputs = inputs.to(self.device)
+        inputs = inputs.to(self.device)
 
         self.model.module.reset()
         for t in range(self.rollout):
@@ -94,7 +93,7 @@ class AutoregressiveTrainer:
 
         for x in self.model.parameters():
             if x.grad is not None:
-                x.grad.data.mul_(1/self.rollout)
+                x.grad.data.mul_( 1 /self.rollout)
 
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
         self.opt.step()
