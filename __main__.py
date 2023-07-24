@@ -20,7 +20,7 @@ def main(seq_len=512,
          rollout=5,
          warmup_steps=100,
          device="cuda",
-         cache_dir="/media/yh04/New Volume/datasets"
+         cache_dir="./cache/datasets"
          ):
 
     lm = AutoregressiveLM(
