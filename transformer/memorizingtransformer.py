@@ -3,39 +3,33 @@
 import torch
 import torch.nn as nn
 
-from .layer import TransformerEmbedding, AttentionLayer
-from transformers import BertModel
+from .layer import TransformerEmbedding, AttentionLayer, MemorizingLayer
 
 
-class Transformer(nn.Module):
+class MemorizingTransformer(nn.Module):
     """
-    A standard Transformer module that outputs the unprocessed
-    output of the last transformer layer
-
-    Parameters:
-        vocab_size (int): Vocabulary size
-        max_len (int): Max length
-        n_layers (int): Number of layers
-        d_model (int): Dimension of transformer
-        n_head (int): Number of attention heads
-        p (int): Dropout probability
-
+    Memorizing Transformer was proposed in
+    https://github.com/lucidrains/memorizing-transformers-pytorch.
+    It uses a memorizing layer that stores past keys and values
+    into an index that is then retrieved via a kNN search.
+    The queries are matched against keys for maximum inner product,
+    and the most similar key/value pair are retrieved.
+    This allows for long range memory that scales up to 300k tokens.
     """
 
     def __init__(self,
                  vocab_size,
                  max_len=512,
                  n_layers=4,
-                 d_model=768,
+                 d_model=512,
                  n_head=8,
                  p=0.1,
                  device="cuda",
+                 bsz=1,
                  **kwargs
                  ):
 
-        super(Transformer, self).__init__()
-        self.n_layers = n_layers
-        self.d_model = d_model
+        super(MemorizingTransformer, self).__init__()
         self.device = device
 
         self.embedding = TransformerEmbedding(vocab_size=vocab_size,
@@ -43,15 +37,29 @@ class Transformer(nn.Module):
                                               max_len=max_len,
                                               device=device)
 
-        self.layers = nn.ModuleList([AttentionLayer(d_model=d_model,
-                                                    ffn_hidden=4 * d_model,
-                                                    n_head=n_head,
-                                                    p=p)
-                                    for _ in range(n_layers)])
+        self.layers1 = nn.ModuleList([AttentionLayer(d_model=d_model,
+                                                     ffn_hidden=4 * d_model,
+                                                     n_head=n_head,
+                                                     p=p)
+                                      for _ in range(n_layers // 2)])
+
+        self.memorizing_layer = MemorizingLayer(d_model=d_model,
+                                                ffn_hidden=4 * d_model,
+                                                n_head=n_head,
+                                                p=p,
+                                                bsz=bsz,
+                                                device=device)
+
+        self.layers2 = nn.ModuleList([AttentionLayer(d_model=d_model,
+                                                     ffn_hidden=4 * d_model,
+                                                     n_head=n_head,
+                                                     p=p)
+                                      for _ in range(1 - n_layers // 2)])
 
         self.reset()
 
     def reset(self):
+        self.memorizing_layer.reset()
         self.state = None
 
     def set_state(self, state):
@@ -60,24 +68,14 @@ class Transformer(nn.Module):
     def get_state(self):
         return self.state
 
-    # @torch.autocast("cuda", dtype=torch.float16)
-    def forward(self, ids, is_causal):
-        """
-        Computes transformer output
-
-        Parameters:
-        ids (Tensor[batch_size, length]): tokens
-        state (Tensor[batch_size, state_len, d_model]): recurrent state
-
-        Returns:
-        x (Tensor[batch_size, length, d_model]): output
-        state (Tensor[batch_size, length, d_model]): next recurrent state
-
-        """
+    def forward(self, ids):
         x = self.embedding(ids)
 
-        for layer in self.layers:
-            x = layer(x, is_causal=is_causal)
+        for layer in self.layers1:
+            x = layer(x)
+        x = self.memorizing_layer(x)
+        for layer in self.layers2:
+            x = layer(x)
 
         return x
 
@@ -122,13 +120,13 @@ class Transformer(nn.Module):
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
-                        self.layers[layer_num].ffn.ff[0].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[1].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("intermediate.dense.bias"):
-                        self.layers[layer_num].ffn.ff[0].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[1].bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.weight") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[2].weight = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[3].weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.dense.bias") and not x.endswith("attention.output.dense.bias"):
-                        self.layers[layer_num].ffn.ff[2].bias = nn.Parameter(state_dict[x].detach())
+                        self.layers[layer_num].ffn.ff[3].bias = nn.Parameter(state_dict[x].detach())
 
                     # layer norms
                     if x.endswith("attention.output.LayerNorm.weight"):
@@ -139,23 +137,3 @@ class Transformer(nn.Module):
                         self.layers[layer_num].norm2.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("output.LayerNorm.bias") and not x.endswith("attention.output.LayerNorm.bias"):
                         self.layers[layer_num].norm2.bias = nn.Parameter(state_dict[x].detach())
-
-
-class TransformerHuggingface:
-
-    def __init__(self, pretrained="bert-base-uncased", **kwargs):
-        super(TransformerHuggingface, self).__init__()
-
-        self.model = BertModel.from_pretrained(pretrained)
-
-    def init_state(self, batch_size=1, device="cpu"):
-        return torch.zeros(1, batch_size, 1, 1, device=device)
-
-    def state_forward(self, ids, state):
-        return state
-
-    def forward(self, ids, state):
-        x = self.model(ids)
-
-        return x, state
-

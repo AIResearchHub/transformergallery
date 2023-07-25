@@ -17,15 +17,14 @@ class FeedForward(nn.Module):
         )
 
     Parameters:
-    dim (int): The dimension of the input and output
-    inner_dim (int): The dimension of the hidden layer
+        dim (int): The dimension of the input and output
+        inner_dim (int): The dimension of the hidden layer
     """
 
     def __init__(self, dim, inner_dim):
         super(FeedForward, self).__init__()
 
         self.ff = nn.Sequential(
-            nn.LayerNorm(dim),
             nn.Linear(dim, inner_dim),
             nn.GELU(),
             nn.Linear(inner_dim, dim)

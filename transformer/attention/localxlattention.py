@@ -58,7 +58,9 @@ def sliding_chunks_matmul_pv(prob, v, w):
 
 class LocalXLAttention(nn.Module):
     """
-    Attention module for Transformer layers
+    Sliding window attention module combined with XL attention
+    for long sequences.
+    Currently doesn't work yet
     """
 
     def __init__(self, d_model, n_head):

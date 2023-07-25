@@ -9,8 +9,8 @@ class PositionalEncoding(nn.Module):
     Compute sinusoid encoding from original transformer paper.
 
     Parameters:
-    d_model (int): dimension of model
-    max_len (int): max length of transformer
+        d_model (int): dimension of model
+        max_len (int): max length of transformer
     """
     def __init__(self, d_model, max_len, device):
         super(PositionalEncoding, self).__init__()

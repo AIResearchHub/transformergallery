@@ -15,8 +15,8 @@ class RecurrentAttention(nn.Module):
     It also uses transformer xl cache memory
 
     Parameters:
-    d_model (int): Dimension of model
-    n_head (int): Number of attention heads
+        d_model (int): Dimension of model
+        n_head (int): Number of attention heads
 
     """
 
@@ -38,7 +38,7 @@ class RecurrentAttention(nn.Module):
         self.x_proj = nn.Linear(2 * d_model, d_model)
         self.s_proj = nn.Linear(2 * d_model, d_model)
 
-    def forward(self, qx, kvx, qs, kvs, mask=None):
+    def forward(self, qx, kvx, qs, kvs, mask=None, is_causal=False):
         """
         Computes recurrent attention for block recurrent transformer
 
@@ -61,11 +61,11 @@ class RecurrentAttention(nn.Module):
         ks, vs = ks.unsqueeze(1), vs.unsqueeze(1)
 
         # perform self attention and cross attention
-        x = F.scaled_dot_product_attention(qx1, kx, vx, attn_mask=mask)
-        s = F.scaled_dot_product_attention(qs1, ks, vs, attn_mask=mask)
+        x = F.scaled_dot_product_attention(qx1, kx, vx, attn_mask=mask, is_causal=is_causal)
+        s = F.scaled_dot_product_attention(qs1, ks, vs, attn_mask=mask, is_causal=False)
 
-        xs = F.scaled_dot_product_attention(qx2, ks, vs, attn_mask=mask)
-        sx = F.scaled_dot_product_attention(qs2, kx, vx, attn_mask=mask)
+        xs = F.scaled_dot_product_attention(qx2, ks, vs, attn_mask=mask, is_causal=is_causal)
+        sx = F.scaled_dot_product_attention(qs2, kx, vx, attn_mask=mask, is_causal=is_causal)
 
         # concatenate and linear projection
         x_proj = self.concat(torch.concat((xs, x), dim=-1))

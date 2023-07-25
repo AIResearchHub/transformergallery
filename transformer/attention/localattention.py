@@ -55,7 +55,10 @@ def sliding_chunks_matmul_pv(prob, v, w):
 
 class LocalAttention(nn.Module):
     """
-    Attention module for Transformer layers
+    Sliding window attention from Longformer paper. Code taken from
+    https://github.com/allenai/longformer/blob/master/longformer/sliding_chunks.py.
+    It divides the attention mechanism into overlapping chunks to fit
+    long sequences into memory.
     """
 
     def __init__(self, d_model, n_head):

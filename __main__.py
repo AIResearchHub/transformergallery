@@ -3,39 +3,28 @@
 from torch.utils.data import DataLoader
 
 from transformer import *
-from trainer import Trainer
+from autoregressivetrainer import AutoregressiveTrainer
+from berttrainer import BertTrainer
 from dataset import PG19Dataset
 
 
-def main(seq_len=4096,
+def main(seq_len=512,
          vocab_size=30522,
-         n_layers=4,
+         n_layers=8,
          d_model=768,
          n_head=8,
          p=0.1,
-         lr=1e-4,
-         batch_size=1,
-         n_accumulate=1,
+         lr=4e-5,
+         batch_size=16,
          burnin=0,
-         rollout=1,
+         rollout=5,
          warmup_steps=100,
          device="cuda",
          cache_dir="/media/yh04/New Volume/datasets"
          ):
 
-    dataloader = DataLoader(
-        PG19Dataset(
-            cache_dir=cache_dir,
-            split="validation",
-            seq_len=seq_len,
-            block_len=rollout,
-            device=device
-        ),
-        batch_size=batch_size,
-    )
-
-    lm = TransformerLM(
-        cls=LongformerHuggingface,
+    lm = AutoregressiveLM(
+        cls=BlockRecurrentTransformer,
         vocab_size=vocab_size,
         max_len=seq_len,
         n_layers=n_layers,
@@ -43,17 +32,28 @@ def main(seq_len=4096,
         n_head=n_head,
         p=p,
         device=device,
-        w=512,
+        w=256,
         bsz=batch_size,
         topk=1,
     )
+    lm.load_pretrained()
 
-    trainer = Trainer(
+    dataloader = DataLoader(
+        PG19Dataset(
+            cache_dir=cache_dir,
+            split="train[:5]",
+            seq_len=seq_len + 1,
+            block_len=rollout,
+            device=device
+        ),
+        batch_size=batch_size,
+    )
+
+    trainer = AutoregressiveTrainer(
         model=lm,
         dataloader=dataloader,
         lr=lr,
         batch_size=batch_size,
-        n_accumulate=n_accumulate,
         seqlen=seq_len,
         burnin=burnin,
         rollout=rollout,

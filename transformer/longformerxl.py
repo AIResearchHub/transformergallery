@@ -8,8 +8,9 @@ from .layer import TransformerEmbedding, LongformerXLLayer
 
 class LongformerXL(nn.Module):
     """
-    A standard Transformer module that outputs the unprocessed
-    output of the last transformer layer
+    A hybrid between Longformer and Transformer XL, currently the model doesn't
+    learn yet, most likely due to a bug in the attention mechanism that combines
+    sliding window attention and xl attention.
 
     Parameters:
     vocab_size (int): Vocabulary size
@@ -48,6 +49,9 @@ class LongformerXL(nn.Module):
                                     for _ in range(n_layers)])
 
         self.reset()
+
+    def from_pretrained(self):
+        pass
 
     def reset(self):
         self.state = None

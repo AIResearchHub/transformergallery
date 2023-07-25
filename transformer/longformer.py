@@ -9,23 +9,24 @@ from transformers import LongformerModel
 
 class Longformer(nn.Module):
     """
-    A standard Longformer module that outputs the unprocessed
-    output of the last transformer layer
+    Longformer is an improvement over Transformer that enables
+    it to attend to long sequences without the quadratic memory
+    requirements by Transformer. The sliding window attention
+    allows it to scale to 10k tokens with linear memory requirements.
 
     Benchmarks:
-    Transfomer seqlen 4096 = 6090MB
-    Transformer seqlen 8192 = 19202MB
-
-    Longformer seqlen 4096 = 5474MB
-    Longformer seqlen 8192 = 9550MB
+        Transfomer seqlen 4096 = 6090MB
+        Transformer seqlen 8192 = 19202MB
+        Longformer seqlen 4096 = 5474MB
+        Longformer seqlen 8192 = 9550MB
 
     Parameters:
-    vocab_size (int): Vocabulary size
-    max_len (int): Max length
-    n_layers (int): Number of layers
-    d_model (int): Dimension of transformer
-    n_head (int): Number of attention heads
-    p (int): Dropout probability
+        vocab_size (int): Vocabulary size
+        max_len (int): Max length
+        n_layers (int): Number of layers
+        d_model (int): Dimension of transformer
+        n_head (int): Number of attention heads
+        p (int): Dropout probability
 
     """
 
@@ -35,7 +36,8 @@ class Longformer(nn.Module):
                  n_layers=4,
                  d_model=512,
                  n_head=8,
-                 p=0.1
+                 p=0.1,
+                 **kwargs
                  ):
         super(Longformer, self).__init__()
         self.max_len = max_len
@@ -51,6 +53,9 @@ class Longformer(nn.Module):
              for _ in range(n_layers)])
 
         self.reset()
+
+    def from_pretrained(self):
+        pass
 
     def reset(self):
         self.state = None
@@ -90,14 +95,14 @@ class LongformerHuggingface(nn.Module):
 
         self.model = LongformerModel.from_pretrained(pretrained)
 
+    def reset(self):
+        pass
+
     def init_state(self, batch_size=1, device="cpu"):
         return torch.zeros(1, batch_size, 1, 1, device=device)
 
-    def state_forward(self, ids, state):
-        return state
-
-    def forward(self, ids, state):
+    def forward(self, ids):
         output = self.model(ids)
 
-        return output.last_hidden_state, state
+        return output.last_hidden_state
 

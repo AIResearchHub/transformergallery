@@ -9,7 +9,10 @@ import math
 
 class XLAttention(nn.Module):
     """
-    Attention module for Transformer layers
+    XL Attention that incorporates previous cached keys and values.
+    Main difference from standard attention is this
+            attn_score = torch.einsum('bhid,bojd->bhij', (q, k))
+    to adjust for different length queries and key/value pair.
     """
 
     def __init__(self, d_model, n_head):
@@ -18,11 +21,16 @@ class XLAttention(nn.Module):
         self.n_head = n_head
         self.d_head = d_model // n_head
 
-        self.w_q = nn.Linear(d_model, d_model, bias=False)
-        self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
-        self.w_concat = nn.Linear(d_model, d_model, bias=False)
+        self.w_q = nn.Linear(d_model, d_model, bias=True)
+        self.w_k = nn.Linear(d_model, d_model, bias=True)
+        self.w_v = nn.Linear(d_model, d_model, bias=True)
+        self.w_concat = nn.Linear(d_model, d_model, bias=True)
 
-    def forward(self, q, kv, mem=None, mask=None):
+        # self.w_q = nn.Linear(d_model, d_model, bias=False)
+        # self.w_kv = nn.Linear(d_model, 2 * (d_model // n_head), bias=False)
+        # self.w_concat = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(self, q, kv, mem=None, mask=None, is_causal=False):
         """
         Parameters:
         q:     [batch_size, length, d_model]
@@ -41,8 +49,11 @@ class XLAttention(nn.Module):
 
         # q [batch_size, length, d_model]
         # c [batch_size, length+mem_length, d_model]
-        q, k, v = self.w_q(q), *self.w_kv(c).chunk(2, dim=-1)
-        q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
+        q, k, v = self.w_q(q), self.w_k(kv), self.w_v(kv)
+        q, k, v = self.split(q), self.split(k), self.split(v)
+
+        # q, k, v = self.w_q(q), *self.w_kv(c).chunk(2, dim=-1)
+        # q, k, v = self.split(q), k.unsqueeze(1), v.unsqueeze(1)
 
         q /= math.sqrt(self.d_head)
 
@@ -51,7 +62,12 @@ class XLAttention(nn.Module):
         attn_score = torch.einsum('bhid,bojd->bhij', (q, k))
 
         if mask is not None:
-            attn_score = attn_score.masked_fill(mask == 0, -10000)
+            attn_score = attn_score.masked_fill(mask == 0, -torch.finfo(attn_score.dtype).max)
+
+        if is_causal:
+            i, j = attn_score.shape[-2:]
+            causal_mask = torch.ones((i, j), dtype=torch.bool, device=q.device).triu(j - i + 1)
+            attn_score = attn_score.masked_fill(causal_mask, -torch.finfo(attn_score.dtype).max)
 
         attn_prob = F.softmax(attn_score, dim=-1)
 
