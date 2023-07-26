@@ -8,7 +8,7 @@ from eval import test_loss, test_memory, test_perplexity, test_perplexity_sep, t
 
 
 def main(cache_dir="/media/yh04/New Volume/datasets",
-         device="cuda"):
+         device="cuda:0"):
 
     model = torch.load("saved/arxivrecsep120000ppl23").to(device)
 

@@ -26,8 +26,8 @@ class AutoregressiveTrainer:
                  ):
 
         self.model = nn.DataParallel(model)
-        if device == "cuda":
-            self.model = self.model.cuda()
+        self.device = torch.device(device)
+        self.model = self.model.to(self.device)
         self.opt = AdamW(self.model.parameters(), lr=lr)
         # self.opt = SophiaG(self.model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=0)
         self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)

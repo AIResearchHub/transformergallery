@@ -98,7 +98,7 @@ class LongformerHuggingface(nn.Module):
     def reset(self):
         pass
 
-    def init_state(self, batch_size=1, device="cpu"):
+    def init_state(self, batch_size=1, device="cuda:0"):
         return torch.zeros(1, batch_size, 1, 1, device=device)
 
     def forward(self, ids):
