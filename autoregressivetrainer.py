@@ -17,6 +17,7 @@ class AutoregressiveTrainer:
                  dataloader,
                  lr,
                  batch_size,
+                 accum,
                  seqlen,
                  burnin,
                  rollout,
@@ -35,6 +36,7 @@ class AutoregressiveTrainer:
 
         self.dataloader = dataloader
         self.batch_size = batch_size
+        self.accum = accum
 
         self.seqlen = seqlen
         self.burnin = burnin
@@ -57,7 +59,7 @@ class AutoregressiveTrainer:
                 continue
 
             # batch (bsz, block_len, seq_len)
-            loss = self.step(batch)
+            loss = self.step(i, batch)
 
             self.log.write(f"{time.time() - self.start}, {loss}\n")
             self.log.flush()
@@ -72,39 +74,48 @@ class AutoregressiveTrainer:
 
             if i % 1000 == 0:
                 self.model.module.reset()
-                torch.save(self.model, "saved/arxivrecsep120000ppl23")
+                torch.save(self.model, "saved/final")
 
-    def step(self, batch):
+    def step(self, i, batch):
         """
+        TODO:
+            verify that accumulating gradients work
+
+
         A training step that does backpropagation at each rollout timestep.
         To train long sequence transformer models such as Transformer XL.
+
+        Args:
+            i (int): iteration to know when to accumulate gradients
+            batch (B, T, S+1): batch to be trained on
+
+        Returns:
+            loss (float): Total loss normalized by T and S
+
         """
         total_loss = 0
         inputs, targets = batch[:, :, :-1], batch[:, :, 1:]
 
         self.model.module.reset()
         for t in range(self.rollout):
-            self.opt.zero_grad()
             expected = self.model(inputs[:, t, :])
-            loss = self.cross_entropy_loss(expected, targets[:, t, :])
-            loss.backward()
+            total_loss += self.cross_entropy_loss(expected, targets[:, t, :])
 
-            total_loss += loss.item()
+        total_loss = total_loss / self.accum
+        total_loss.backward()
 
-        for x in self.model.parameters():
-            if x.grad is not None:
-                x.grad.data.mul_(1/self.rollout)
+        if i % self.accum == 0:
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
+            self.opt.step()
+            self.opt.zero_grad()
 
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
-        self.opt.step()
-
-        return total_loss / (self.rollout * self.seqlen)
+        return total_loss.item() / (self.rollout * self.seqlen)
 
     def cross_entropy_loss(self, expected, target):
         """
         cross entropy loss
 
-        Parameters:
+        Args:
             expected (batch_size, max_len, vocab_size)
             target (batch_size, max_len)
         """
