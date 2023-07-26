@@ -1,4 +1,5 @@
 
+
 from transformers import BertTokenizerFast, BartTokenizerFast
 
 import logging
@@ -8,6 +9,7 @@ import torch
 import os
 from torch.nn.utils.rnn import CharTokenizer
 from torchtext.data import get_tokenizer
+
 
 def apply_mlm_mask(batch, mask_prob):
     """
@@ -32,21 +34,14 @@ def apply_mlm_mask(batch, mask_prob):
     return inputs.long(), labels.long()
 
 
-def read_file(path):
-    with open(path, 'r') as f:
-        content = "".join(f.readlines())
-    return content
-
-
-def read_data(folderpath, max_files):
-    files = os.listdir(folderpath)
-
-    return [read_file(os.path.join(folderpath, file)) for file in files[:max_files]]
-
-
-def tokenize(texts,type):
+def tokenize(texts, type):
+    """
+    Args:
+         texts (List):
+         type (string):
+    """
     if type == "bert":
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
     if type == "char":
         tokenizer = CharTokenizer()
     if type == "spacy":
@@ -66,21 +61,4 @@ def partition(ids, max_len):
 
 def filter_empty(data, min_len=1):
     return [x for x in data if x.size(0) >= min_len]
-
-
-def create_pg19_data(path, max_len, max_files):
-    """
-    :return: List[Tensor(length, max_len)], None
-    """
-
-    data = partition(tokenize(read_data(path, max_files=max_files)), max_len=max_len)
-    # remove empty data
-    data = [x for x in data if x.size(0) != 0]
-
-    return data
-
-
-if __name__ == "__main__":
-    x = tokenize(["hello world, what is going on", "hello wrold, wha  dsa dkwkoaksdm"])
-    print(x)
 

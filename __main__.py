@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--p", default=0.1, type=float)
     parser.add_argument("--lr", default=4e-5, type=float)
     parser.add_argument("--batch_size", default=32, type=int)
+    parser.add_argument("--accum", default=4, type=int)
     parser.add_argument("--burnin", default=0, type=int)
     parser.add_argument("--rollout", default=5, type=int)
     parser.add_argument("--warmup_steps", default=100, type=int)
@@ -60,6 +61,7 @@ def main():
         dataloader=dataloader,
         lr=args.lr,
         batch_size=args.batch_size,
+        accum=args.accum,
         seqlen=args.seq_len,
         burnin=args.burnin,
         rollout=args.rollout,

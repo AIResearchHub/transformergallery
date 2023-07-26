@@ -3,20 +3,20 @@
 import torch
 import torch.nn as nn
 
-from .layer import TransformerEmbedding, AttentionLayer, XLAttentionLayer, RecurrentLayer
+from .layer import TransformerEmbedding, XLCrossLayer, RecurrentLayer
 
 # from block_recurrent_transformer_pytorch import BlockRecurrentTransformer as BlockRecurrentTransformerLucidrains
 
 
-class BlockRecurrentTransformer(nn.Module):
+class BlockFeedbackTransformer(nn.Module):
     """
-    Block Recurrent Transformer was proposed by this paper:
-    https://arxiv.org/pdf/2203.07852.pdf
-    It is composed of a recurrent attention layer
-    sandwiched in between transformer xl layers.
-    The recurrent layer is trained via BPTT, and it
-    uses shared keys and values from inputs and recurrent states
-    to share information across past inputs and current inputs
+    Block Feedback Transformer is an upgrade
+    from Block Recurrent Transformer where the recurrent state
+    is broadcasted to all layers to do cross attention
+    after self attention and gradients are backpropagated
+    by each layer. The improvements depend on the dataset
+    (I assume datasets that require reasoning is improved
+    and datasets that require memory is degraded)
 
     Parameters:
         w (int): window size to iterate over per sequence
@@ -30,12 +30,12 @@ class BlockRecurrentTransformer(nn.Module):
                  d_model=512,
                  n_head=8,
                  p=0.1,
-                 device="cuda",
                  w=512,
+                 device="cuda",
                  statelen=32,
                  **kwargs
                  ):
-        super(BlockRecurrentTransformer, self).__init__()
+        super(BlockFeedbackTransformer, self).__init__()
         self.n_layers = n_layers
         self.d_model = d_model
         self.w = w
@@ -49,22 +49,22 @@ class BlockRecurrentTransformer(nn.Module):
                                               max_len=max_len,
                                               device=device
                                               )
-        self.layers1 = nn.ModuleList([XLAttentionLayer(d_model=d_model,
-                                                       ffn_hidden=4 * d_model,
-                                                       n_head=n_head,
-                                                       p=p
-                                                       )
+        self.layers1 = nn.ModuleList([XLCrossLayer(d_model=d_model,
+                                                   ffn_hidden=4 * d_model,
+                                                   n_head=n_head,
+                                                   p=p
+                                                   )
                                       for _ in range(n_layers // 2)])
         self.recurrent = RecurrentLayer(d_model=d_model,
                                         ffn_hidden=4 * d_model,
                                         n_head=n_head,
                                         p=p
                                         )
-        self.layers2 = nn.ModuleList([XLAttentionLayer(d_model=d_model,
-                                                       ffn_hidden=4 * d_model,
-                                                       n_head=n_head,
-                                                       p=p
-                                                       )
+        self.layers2 = nn.ModuleList([XLCrossLayer(d_model=d_model,
+                                                   ffn_hidden=4 * d_model,
+                                                   n_head=n_head,
+                                                   p=p
+                                                   )
                                       for _ in range(n_layers - (n_layers // 2))])
 
         self.reset()
@@ -100,17 +100,18 @@ class BlockRecurrentTransformer(nn.Module):
 
             for layer in self.layers1:
                 nextxlmems.append(x.detach())
-                x = layer(x, next(self.xlmems, None), is_causal=is_causal)
+                x = layer(x, mem=next(self.xlmems, None), state=self.state, is_causal=is_causal)
 
-            x, self.state = self.recurrent(x, self.state, is_causal=is_causal)
+            x, next_state = self.recurrent(x, self.state, is_causal=is_causal)
             # x = self.recurrent(x, is_causal=is_causal)
 
             for layer in self.layers2:
                 nextxlmems.append(x.detach())
-                x = layer(x, next(self.xlmems, None), is_causal=is_causal)
+                x = layer(x, mem=next(self.xlmems, None), state=self.state, is_causal=is_causal)
 
             out.append(x)
             self.xlmems = nextxlmems
+            self.state = next_state
 
         out = torch.concat(out, dim=1)
         assert out.shape == (bsz, seqlen, dim)
@@ -141,21 +142,21 @@ class BlockRecurrentTransformer(nn.Module):
                 if layer_num < self.n_layers // 2:
                     # attention
                     if x.endswith("attention.self.query.weight"):
-                        self.layers1[layer_num].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_q.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.query.bias"):
-                        self.layers1[layer_num].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_q.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.weight"):
-                        self.layers1[layer_num].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_k.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.bias"):
-                        self.layers1[layer_num].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_k.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.weight"):
-                        self.layers1[layer_num].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_v.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.bias"):
-                        self.layers1[layer_num].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_v.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.weight"):
-                        self.layers1[layer_num].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.bias"):
-                        self.layers1[layer_num].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers1[layer_num].self_attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):
@@ -180,21 +181,21 @@ class BlockRecurrentTransformer(nn.Module):
                 elif layer_num < self.n_layers:
                     # attention
                     if x.endswith("attention.self.query.weight"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_q.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_q.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.query.bias"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_q.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_q.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.weight"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_k.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_k.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.key.bias"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_k.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_k.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.weight"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_v.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_v.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.self.value.bias"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_v.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_v.bias = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.weight"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_concat.weight = nn.Parameter(state_dict[x].detach())
                     if x.endswith("attention.output.dense.bias"):
-                        self.layers2[layer_num - self.n_layers // 2].attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
+                        self.layers2[layer_num - self.n_layers // 2].self_attention.w_concat.bias = nn.Parameter(state_dict[x].detach())
 
                     # feed forward
                     if x.endswith("intermediate.dense.weight"):

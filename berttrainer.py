@@ -2,39 +2,42 @@
 
 import torch
 import torch.nn as nn
-from torch.optim import Adam
+from torch.optim import AdamW
 
 import time
 import datetime
 
-from optim_schedule import ScheduledOptim
 from utils import apply_mlm_mask
 
 
 class BertTrainer:
+    """
+    Trains a Large Language Model to predict the masked words in the inputs.
+    """
+
+    print_every = 5
+    save_every = 1000
 
     def __init__(self,
                  model,
                  dataloader,
                  lr,
                  batch_size,
+                 accum,
                  seqlen,
                  burnin,
                  rollout,
-                 warmup_steps,
-                 device,
+                 device="cuda"
                  ):
 
-        self.model = nn.DataParallel(model)
-        if device == "cuda":
-            self.model = self.model.cuda()
-        self.opt = Adam(self.model.parameters(), lr=lr)
-        self.opt_schedule = ScheduledOptim(self.opt, self.model.module.d_model, n_warmup_steps=warmup_steps)
+        self.model = nn.DataParallel(model).to(device)
+        self.opt = AdamW(self.model.parameters(), lr=lr)
 
         self.criterion = nn.NLLLoss(ignore_index=0)
 
         self.dataloader = dataloader
         self.batch_size = batch_size
+        self.accum = accum
 
         self.seqlen = seqlen
         self.burnin = burnin
@@ -56,24 +59,24 @@ class BertTrainer:
             if batch.size(0) != self.batch_size:
                 continue
 
-            # batch (bsz, block_len, seq_len)
-            loss = self.step(batch)
+            # (B, T, S)
+            loss = self.step(i, batch)
 
             self.log.write(f"{time.time() - self.start}, {loss}\n")
             self.log.flush()
 
             self.updates += 1
 
-            if i % 5 == 0:
+            if i % self.print_every == 0:
                 print(f"Epoch: {epoch} \t "
                       f"Time: {time.time() - self.start} \t "
                       f"Loss: {loss} \t "
                       f"Sec/Update: {(time.time() - self.start) / self.updates}")
 
-            if i % 1000 == 0:
+            if i % self.save_every == 0:
                 torch.save(self.model, "saved/final")
 
-    def step(self, batch):
+    def step(self, i, batch):
         """
         A training step that does backpropagation at each rollout timestep.
         To train long sequence transformer models such as Transformer XL.
@@ -84,15 +87,17 @@ class BertTrainer:
         self.model.module.reset()
         for t in range(self.rollout):
             expected = self.model(inputs[:, t, :])
-            loss = self.bert_loss(expected, targets[:, t, :])
-            self.opt.zero_grad()
-            loss.backward()
+            total_loss += self.bert_loss(expected, targets[:, t, :])
+
+        total_loss = total_loss / self.accum
+        total_loss.backward()
+
+        if i % self.accum == 0:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.1)
             self.opt.step()
+            self.opt.zero_grad()
 
-            total_loss += loss.item()
-
-        return total_loss / (self.rollout * self.seqlen)
+        return total_loss.item() / (self.rollout * self.seqlen)
 
     def bert_loss(self, expected, target):
         """
