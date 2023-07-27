@@ -13,6 +13,11 @@ class BlockMemorizingTransformer(nn.Module):
     It uses both recurrent layers and kNN search memorizing layer
     for enhanced long range capabilities. It combines multiple
     state-of-the-art techniques to try to improve SOTA.
+
+    Args:
+        bsz (int): Pre-specified batch size
+        w (int): Window size without each sequence
+        statelen (int): Length of recurrent state
     """
 
     def __init__(self,

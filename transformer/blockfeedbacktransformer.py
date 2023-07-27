@@ -18,7 +18,7 @@ class BlockFeedbackTransformer(nn.Module):
     (I assume datasets that require reasoning is improved
     and datasets that require memory is degraded)
 
-    Parameters:
+    Args:
         w (int): window size to iterate over per sequence
         statelen (int): Length of the recurrent state e.g. (bsz, statelen, dim)
     """

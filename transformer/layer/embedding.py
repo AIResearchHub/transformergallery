@@ -8,7 +8,7 @@ class PositionalEncoding(nn.Module):
     """
     Compute sinusoid encoding from original transformer paper.
 
-    Parameters:
+    Args:
         d_model (int): dimension of model
         max_len (int): max length of transformer
     """

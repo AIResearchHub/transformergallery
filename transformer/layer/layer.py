@@ -11,7 +11,7 @@ class AttentionLayer(nn.Module):
     Class representing a standard transformer layer. This layer includes self-attention,
     normalization, dropout, and a feed-forward network
 
-    Parameters:
+    Args:
         d_model (int): The dimension of the model
         ffn_hidden (int): The size of the hidden layer in the feed forward network
         n_head (int): The number of attention heads

@@ -15,6 +15,9 @@ class MemorizingTransformer(nn.Module):
     The queries are matched against keys for maximum inner product,
     and the most similar key/value pair are retrieved.
     This allows for long range memory that scales up to 300k tokens.
+
+    Args:
+        bsz (int): pre-specified batch size
     """
 
     def __init__(self,

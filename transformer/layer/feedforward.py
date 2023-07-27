@@ -16,7 +16,7 @@ class FeedForward(nn.Module):
             Linear(inner_dim, dim)
         )
 
-    Parameters:
+    Args:
         dim (int): The dimension of the input and output
         inner_dim (int): The dimension of the hidden layer
     """

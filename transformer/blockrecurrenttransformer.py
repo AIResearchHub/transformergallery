@@ -18,7 +18,7 @@ class BlockRecurrentTransformer(nn.Module):
     uses shared keys and values from inputs and recurrent states
     to share information across past inputs and current inputs
 
-    Parameters:
+    Args:
         w (int): window size to iterate over per sequence
         statelen (int): Length of the recurrent state e.g. (bsz, statelen, dim)
     """

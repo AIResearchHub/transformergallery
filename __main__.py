@@ -9,6 +9,7 @@ from dataset import TextDataset
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="pg19", type=str)
     parser.add_argument("--seq_len", default=512, type=int)
     parser.add_argument("--vocab_size", default=30522, type=int)
     parser.add_argument("--n_layers", default=4, type=int)
@@ -45,13 +46,13 @@ def main():
 
     dataloader = DataLoader(
         TextDataset(
-            name="scientific_papers",
+            name=args.dataset,
             cache_dir=args.cache_dir,
             split="train[:20000]",
             seq_len=args.seq_len,
             block_len=args.rollout,
             device=args.device,
-            sep_padding=True
+            sep_padding=False
         ),
         batch_size=args.batch_size,
     )

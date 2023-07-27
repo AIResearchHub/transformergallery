@@ -20,6 +20,9 @@ class RecurrentMemoryTransformer(nn.Module):
     The model is trained via BPTT inside sequence in
     blocks of num_token + 2*mem_tokens
 
+    Args:
+        num_tokens (int): Number of input tokens per window
+        mem_tokens (int): Number of memory tokens
     """
 
     def __init__(self,
