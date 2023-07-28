@@ -2,7 +2,7 @@
 
 The Attention Mechanism represents a milestone in the evolution of neural networks, particularly within the realm of Natural Language Processing (NLP). The core idea behind attention is the ability to focus on specific parts of an input when generating an output, enabling the model to pay 'attention' to contextual information that contributes most to understanding the input. Similar to how humans selectively focus on certain parts of an image or conversation, attention mechanisms allow models to associate different levels of relevance or importance to input features when making predictions.
 
-we'll explore the key concepts that underpin the Attention Mechanism, such as queries, keys, and values, which form the basis of the mechanism, and how they relate to the broader concept of attention in the context of NLP. We'll also delve into the mathematical formulation of attention, discussing its general formula, the ways we calculate weights, and different approaches to measuring similarity.
+We'll explore the key concepts that underpin the Attention Mechanism, such as queries, keys, and values, which form the basis of the mechanism, and how they relate to the broader concept of attention in the context of NLP. We'll also delve into the mathematical formulation of attention, discussing its general formula, the ways we calculate weights, and different approaches to measuring similarity.
 
 Furthermore, we will introduce self-attention, a variant of the attention mechanism used extensively in state-of-the-art models like Transformers. We will help build an intuitive understanding of self-attention and its mathematical representation.
 
@@ -84,7 +84,7 @@ $$s = \sum_{i=1}^{k} q^{T}k_{i}$$
 
 Self-attention is perhaps the most complicated and integral part of the transformer model.  Before we explore the math and functions behind it, let's cover some intuition.  
 
-If attention is how much we decide to weight certain features, then self-attention naturally follows as how much we decide to weight our own features.  Let's start with an example:
+If attention is how much we decide to weigh certain features, then self-attention naturally follows as how much we decide to weigh our own features.  Let's start with an example:
 
 "When he saw his owner, the dog was _____ , so he wagged his tail"
 
@@ -146,7 +146,7 @@ where $S \in \mathbb{R}^{n \times d_{Q}}$.  You might have noticed that earlier 
 
 Often, people will refer to this specific self-attention formula as "scaled dot-product attention"
 
-## Multiheaded attention
+## Multi-Headed attention
 
 Once we've understood self-attention, multi-head attention follows naturally.
 
@@ -156,7 +156,7 @@ To get self-attention on different scales, we employ multiple self-attention for
 
 A single self-attention mechanism is called a "head", which gives rise to the name "multi-head attention" when we utilize multiple heads simultaneously.
 
-Notationally, for the $i \text{th}$ head, we denote the $i \text{th}$ head's unique query, keys, and values as $W_{Q}^{(i)}, W_{K}^{(i)}, W_{V}^{(i)}$ respectively.  Some people switch the superscript and the sub-script when writing the $i \text{th}$ attention weights, but, for notational consistency with the previous explanation of self-attention, we will write it as we just presented it.
+Notationally, for the $i \text{th}$ head, we denote the $i \text{th}$ head's unique query, keys, and values as $W_{Q}^{(i)}, W_{K}^{(i)}, W_{V}^{(i)}$ respectively.  Some people switch the superscript and the subscript when writing the $i \text{th}$ attention weights, but, for notational consistency with the previous explanation of self-attention, we will write it as we just presented it.
 
 In a multi-head attention layer, the input $X$ gets fed to the multiple heads which use self-attention to produce a unique attention score, $S^{(i)}$, based on their own weights.  We then concatenate all the $S^{(i)}$ for $i \leq$ the number of heads.  Lastly, we feed the massive attention matrix through a feed-forward neural network, and, voila, we have just passed through a multi-head attention layer.
 
@@ -177,5 +177,6 @@ https://theaisummer.com/self-attention/
 https://en.wikipedia.org/wiki/Softmax_function
 https://www.youtube.com/watch?v=A1eUVxscNq8&t=17s&ab_channel=SebastianRaschka
 https://d2l.ai/index.html
+
 
 
