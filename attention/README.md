@@ -45,7 +45,7 @@ Based on our formula, the more similar the query is to a key - i.e., the closer 
 
 As an example to build intuition, assume we have a dataset of engineering major's projecting starting salaries (value) given their GPA (key) (for the sake of the exercise, let's assume that there is some kind of correlation between GPA and starting salary).  
 
-A fourth-year engineering student with a 3.5 (query) might look through the database and focus only on the GPAs in the range of 3.4-3.6 (similar keys) and would expect to receive a starting salary in that range (weighting values more heavily based on query/key similarity) cetrus paribus.  
+A fourth-year engineering student with a 3.5 (query) might look through the database and focus only on the GPAs in the range of 3.4-3.6 (similar keys) and would expect to receive a starting salary in that range (weighting values more heavily based on query/key similarity) ceteris paribus.  
 They might pay some attention to those with a 3.0 or 4.0 GPA (dissimilar keys) and the starting salaries of those students, but our 3.5 GPA student wouldn't really expect a 3.0 or 4.0 GPA student's salary (weighting values lightly based on query/key correlation), though it still remains a possibility.
 
 This example begs the question: "What exactly is $\textrm{similarity}(q, k_{i})$"?  How will we know that it works for the example?  The answer is somewhat unsatisfying: we have to decide what $\textrm{similarity}(q, k_{i})$ is.
