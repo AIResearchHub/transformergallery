@@ -10,11 +10,17 @@ If you've ever looked up a tutorial on transformers, you've likely seen this ima
 
 The problem with this picture is that, unless you already know the ins and outs of a transformer model, the picture can be very confusing.
 
-In the following article, we will traverse this scary picture and try to make it seem like common sense.
+In the following article, we will traverse this scary picture and try to make it seem like common sense.  Note, however, that the encoder-decoder model is just a type of transformer.  The tag of "transformer" can extend to any machine learning model that contains some kind of encoder or decoder, but is not limited to including both.  Though transformers are far more flexible than their original encoder-decoder model; nevertheless, the encoder-decoder is the perfect place to start for learning purposes.
 
-** TALK ABOUT ENCODER DECODER MODEL **
+At a high level, the encoder's job is to produce a vector-representation of the input sequence, while the decoder deciphers the encoder's vector to produce an output.
 
-A slight disclaimer: to understand the transformer, you need to understand self-attention and multi-head attention.  Knowledge of them will be assumed and used as a base in the following explanations.  We have an article outlining these attention mechanisms to a sufficient degree of rigor if you would like to learn about it or if you need to burnish your memory.
+Slightly more accurately, both the encoder and decoder are made up of many encoder and decoder blocks.  The encoder runs through its blocks to create a context vector for each word, which are then fed to all blocks of the decoder.  Importantly, the decoder is auto-regressive, which means it produces one word at a time.  Therefore, the decoder runs through all its blocks to produce a word with the help of the encoder's context vectors, then runs again to produce the next word (in an NLP context), which is based on the inputs context vectors and the answer that it has generated at that point.  In this manner, the decoder is simply a next word predicter powered by context vectors.
+
+With enough training, the transformer seems to perform human-like tasks, but, keep in mind that it's easy to anthropomorphize complicated models - at their core, transformers, like any machine learning model, are just probabalistic.
+
+The reason why transformers are so effective in their predictions is their self-attention mechanism, which leads to a slight disclaimer: to understand the transformer, you need to understand self-attention and multi-head attention.  Knowledge of them will be assumed and used as a base in the following explanations.  We have an article outlining these attention mechanisms to a sufficient degree of rigor if you would like to learn about it or if you need to burnish your memory.
+
+With that being said, let's dive in!
 
 ## Positional Encoding
 Before both the encoder and decoder, the input embedding and output embedding must go through a positional encoding step.
