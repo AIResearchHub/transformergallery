@@ -45,8 +45,6 @@ https://www.desmos.com/calculator/x5qk7e5dut
 
 In the end, we add these positional vectors to our preexisting word embeddings so that our transformer has information about the position of each word built into each vector.
 
-** Questions to answer: why does it alternate functinos for even/odd?  How does the model significance of the positional vectors (how does it know what position a word is in if it just receives a vector with no indication of how much of that vector was influenced by the positional encoding); does it just learn them in traning? **
-
 Now, we should understand the motivation and technique behding this part of the graph:
 <img width="514" alt="Screen Shot 2023-06-23 at 5 13 04 PM" src="https://github.com/ArjunSohur/transformergallery/assets/105809809/4c422c71-57cb-4f05-a8b7-55c9d44360ae">
 
@@ -59,7 +57,14 @@ To understand the encoder - and decoder, for that matter, - you must understant 
 
 The good news is that once you understand multihead attention, the encoder starts to feel less daunting.
 
-After doing positional encoding, we get an input that is  
+After doing positional encoding, we get an input that is of shape $\mathbb{R}^{n \times d}$, where $n$ is the input sequence length, and $d$ is the hidden encoding dimension.  A copy of this input matrix is stored while the input matrix itself goes through multi-head attention.  Once the input matrix has been properly proccessed through multi-head attention (with each head of shape $\mathbb{R}^{n \times d}$), we take the copy of the input matrix and add it to each head of the multi-head attention.  Then, we normalize each matrix.  We perform the "add & norm" step to aid gradient descent in backpropogation.
+
+The last step of an encoder block is to clean up the input of now normalized and stabilized multi-head attention output.  We clean up by sending the multiple matrices through a fully-connected neural network that compares the outputs of each attention head and spits out one matrix of shape $\mathbb{R}^{n \times d}$, which can then functions as the input to the next layer of encoder.
+
+Encoders, like classic neural networks, are usually stacked on one another for maximum learning.
+
+In an encoder-decoder architecture, then, when we've iterated over all encoder blocks [TODO - ADD HERE]
+
 
 ## Decoder
 
