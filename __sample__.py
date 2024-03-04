@@ -28,8 +28,8 @@ def main(prompt="once upon a time", num_samples=10, device="cuda"):
     x = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
     x = torch.tensor(x, dtype=torch.int64, device=device).repeat(num_samples, 1)
 
-    model.module.reset()
     for _ in range(500):
+        model.module.reset()
         logits = model(x)
         logits = logits[:, -1, :]
         probs = F.softmax(logits, dim=-1)

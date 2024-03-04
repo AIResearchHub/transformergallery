@@ -7,7 +7,7 @@ logging.getLogger("pytorch_pretrained_bert.tokenization").setLevel(logging.ERROR
 
 import torch
 import os
-from torch.nn.utils.rnn import CharTokenizer
+# from torch.nn.utils.rnn import CharTokenizer
 from torchtext.data import get_tokenizer
 
 
@@ -42,8 +42,8 @@ def tokenize(texts, type):
     """
     if type == "bert":
         tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    if type == "char":
-        tokenizer = CharTokenizer()
+    # if type == "char":
+    #     tokenizer = CharTokenizer()
     if type == "spacy":
         tokenizer = get_tokenizer("spacy")
     return [tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text)) for text in texts]
