@@ -35,7 +35,7 @@ def apply_mlm_mask(batch, mask_prob):
     return inputs.long(), labels.long()
 
 
-def tokenize(texts, type):
+def tokenize(texts, type='bert'):
     """
     Args:
          texts (List):

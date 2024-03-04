@@ -66,7 +66,7 @@ class AutoregressiveLM(nn.Module):
         return self.transformer.reset()
 
     def set_state(self, state):
-        return self.transformer.set_state(state)
+        return self.transformer.set_state(*state)
 
     def get_state(self):
         return self.transformer.get_state()

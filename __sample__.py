@@ -6,8 +6,8 @@ from transformers import BertTokenizerFast
 from utils import generate_samples, join, remove_padding
 
 
-def main(prompt="", num_samples=2, seq_len=512, device="cuda:0"):
-    model = torch.load("saved/final").to(device)
+def main(prompt="", num_samples=8, seq_len=512, device="cuda:0"):
+    model = torch.load("saved/arxivrecsep120000ppl23").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     prompt_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))

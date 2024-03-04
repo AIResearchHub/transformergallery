@@ -9,7 +9,7 @@ from dataset import TextDataset
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="pg19", type=str)
+    parser.add_argument("--dataset", default="scientific_papers", type=str)
     parser.add_argument("--seq_len", default=512, type=int)
     parser.add_argument("--vocab_size", default=30522, type=int)
     parser.add_argument("--n_layers", default=4, type=int)
@@ -21,9 +21,9 @@ def main():
     parser.add_argument("--accum", default=4, type=int)
     parser.add_argument("--burnin", default=0, type=int)
     parser.add_argument("--rollout", default=5, type=int)
-    parser.add_argument("--warmup_steps", default=100, type=int)
     parser.add_argument("--device", default="cuda:0", type=str)
-    parser.add_argument("--cache_dir", default="./cache/datasets", type=str)
+    parser.add_argument("--cache_dir", default="/media/yh04/New Volume/datasets", type=str)
+    # parser.add_argument("--cache_dir", default="/media/yh04/UBUNTU 20_0/datasets", type=str)
 
     args = parser.parse_args()
 
@@ -42,17 +42,17 @@ def main():
         num_tokens=128,
         mem_tokens=64,
     )
-    lm.load_pretrained()
+    # lm.load_pretrained()
 
     dataloader = DataLoader(
         TextDataset(
             name=args.dataset,
             cache_dir=args.cache_dir,
-            split="train[:20000]",
+            split="train[:50000]",
             seq_len=args.seq_len,
             block_len=args.rollout,
             device=args.device,
-            sep_padding=False
+            sep_padding=True
         ),
         batch_size=args.batch_size,
     )
@@ -66,7 +66,6 @@ def main():
         seqlen=args.seq_len,
         burnin=args.burnin,
         rollout=args.rollout,
-        warmup_steps=args.warmup_steps,
         device=args.device
     )
     print("Starting training run...")
