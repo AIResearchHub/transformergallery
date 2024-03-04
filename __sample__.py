@@ -1,46 +1,24 @@
 
 
 import torch
-import torch.nn.functional as F
 from transformers import BertTokenizerFast
 
-
-def join(strings):
-    output = ""
-    for string in strings:
-        if string[:2] == "##":
-            output += string[2:]
-        elif string == "i" or string == "a":
-            output += ' ' + string
-        elif len(string) == 1:
-            output += string
-        else:
-            output += ' ' + string
-
-    return output
+from utils import generate_samples, join, remove_padding
 
 
-def main(prompt="once upon a time", num_samples=10, device="cuda"):
+def main(prompt="", num_samples=2, seq_len=512, device="cuda:0"):
     model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
-    # (bsz, seqlen)
-    x = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
-    x = torch.tensor(x, dtype=torch.int64, device=device).repeat(num_samples, 1)
+    prompt_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
 
-    for _ in range(500):
-        model.module.reset()
-        logits = model(x)
-        logits = logits[:, -1, :]
-        probs = F.softmax(logits, dim=-1)
-        idx_next = torch.multinomial(probs, num_samples=1)
+    samples = generate_samples(model, prompt_ids=prompt_ids, seq_len=seq_len,
+                               B=num_samples, T=1024-2, temperature=1.0)
 
-        # x    (bsz, seqlen)
-        # pred (bsz, 1)
-        x = torch.concat((x, idx_next), dim=-1)
-
-    for sample in x:
-        print("=================================================================================")
+    for sample in samples:
+        sample, mask = remove_padding(sample)
+        print("SAMPLE:")
+        print()
         sentence = tokenizer.batch_decode(sample)
         print(join(sentence))
 
