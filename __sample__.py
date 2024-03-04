@@ -21,15 +21,15 @@ def join(strings):
 
 
 def main(prompt="therefore, the equation can be written as", num_samples=1, device="cuda"):
-    model = torch.load("saved/arxivrecsep120000ppl23").to(device)
+    model = torch.load("saved/final").to(device)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
 
     # (bsz, seqlen)
     x = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(prompt))
     x = torch.tensor(x, dtype=torch.int64, device=device).repeat(num_samples, 1)
 
-    model.module.reset()
     for _ in range(500):
+        model.module.reset()
         logits = model(x)
         logits = logits[:, -1, :]
         probs = F.softmax(logits, dim=-1)
