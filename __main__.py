@@ -22,7 +22,8 @@ def main():
     parser.add_argument("--burnin", default=0, type=int)
     parser.add_argument("--rollout", default=5, type=int)
     parser.add_argument("--device", default="cuda:0", type=str)
-    parser.add_argument("--cache_dir", default="/media/yh04/New Volume/datasets", type=str)
+    parser.add_argument("--cache_dir", default=".cache/datasets", type=str)
+    # parser.add_argument("--cache_dir", default="/media/yh04/New Volume/datasets", type=str)
     # parser.add_argument("--cache_dir", default="/media/yh04/UBUNTU 20_0/datasets", type=str)
 
     args = parser.parse_args()
